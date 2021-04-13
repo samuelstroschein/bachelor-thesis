@@ -1,5 +1,4 @@
 import { retractionTemplate } from './retraction_template'
-import { saveAs } from 'file-saver'
 
 
 export interface SegmentVariables {
@@ -11,9 +10,8 @@ export interface SegmentVariables {
 }
 
 
-export function downloadGcode(filename: string, gcode: string) {
-    const blob = new Blob([gcode], { type: 'text/plain' });
-    saveAs(blob, `${filename}.gcode`)
+export function gcodeAsBlob(gcode: string): Blob {
+    return new Blob([gcode], { type: 'text/plain' });
 }
 
 
