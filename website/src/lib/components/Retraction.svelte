@@ -45,9 +45,9 @@
 <p>2. Download the gcode and print it. The file is split in segemnts as shown on the right.</p>
 <p>3. Proceed with the next step which will show when you downloaded the gcode.</p>
 
-<div class="my-2" />
+<div class="my-4" />
 
-<Row crossAxisAlignment="center">
+<Row mainAxisAlignment="between">
 	<div>
 		<Column>
 			<NumberInput bind:value={endRange} label="End Range in mm" />
