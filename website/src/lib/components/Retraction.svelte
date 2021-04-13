@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Step from './Step.svelte';
 	import type { SegmentVariables } from './../typescript/generate_gcode';
 	import { gcodeAsBlob, generateRetractionGcode } from './../typescript/generate_gcode';
 	import { NumberInput, Button } from 'carbon-components-svelte';
@@ -46,6 +47,17 @@
 
 <div class="h-2" />
 
+<h3 class="mb-1">Step 0</h3>
+<h4>Instructions:</h4>
+<p>
+	1. Select a starting range to initialize the algorithm. The end range must be bigger than the
+	start range.
+</p>
+<p>2. Download the gcode and print it. The file is split in segemnts as shown on the right.</p>
+<p>3. Proceed with the next step which will show when you downloaded the gcode.</p>
+
+<div class="my-2" />
+
 <Row crossAxisAlignment="center">
 	<div>
 		<Column>
@@ -54,9 +66,19 @@
 			<NumberInput bind:value={startRange} label="Start Range in mm" />
 		</Column>
 		<div class="h-4" />
-		<Button on:click={initAlgorithm}>Download gcode</Button>
+		{#if $algorithm.stepRanges.length > 1}
+			<Button on:click={initAlgorithm}>Download gcode</Button>
+		{:else}
+			<Button kind="secondary" on:click={initAlgorithm}>Restart</Button>
+		{/if}
 	</div>
 	<div class="w-96">
 		<img src="retraction_diagram.jpeg" alt="" />
 	</div>
 </Row>
+
+<div class="h-4" />
+
+{#each $algorithm.stepRanges as _}
+	<Step />
+{/each}
