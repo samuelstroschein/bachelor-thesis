@@ -1,7 +1,11 @@
 <script lang="ts">
 	import Step from './Step.svelte';
 	import type { SegmentVariables } from './../typescript/generate_gcode';
-	import { gcodeAsBlob, generateRetractionGcode } from './../typescript/generate_gcode';
+	import {
+		gcodeAsBlob,
+		generateRetractionGcode,
+		downloadGcode
+	} from './../typescript/generate_gcode';
 	import { NumberInput, Button } from 'carbon-components-svelte';
 	import { AlgorithmV1 } from '../typescript/algorithm_v1';
 	// @ts-ignore
@@ -11,22 +15,9 @@
 	let endRange: number = 6;
 	let startRange: number = 2;
 
-	function download(blob, fileName) {
-		var a = document.createElement('a');
-		a.download = fileName;
-		a.href = URL.createObjectURL(blob);
-		a.dataset.downloadurl = ['text/plain', a.download, a.href].join(':');
-		a.style.display = 'none';
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		setTimeout(function () {
-			URL.revokeObjectURL(a.href);
-		}, 1500);
-	}
+	let initializedAlgorithm = false;
 
 	function initAlgorithm() {
-		// algorithm.set(new AlgorithmV1([endRange, startRange]));
 		algorithm.set(new AlgorithmV1([endRange, startRange]));
 		const firstStep = $algorithm.step();
 		const segments: SegmentVariables[] = firstStep.map((retractionDistance) => {
@@ -39,7 +30,8 @@
 			};
 		});
 		const file = gcodeAsBlob(generateRetractionGcode([220, 220], 200, 60, segments));
-		download(file, 'retraction1.gcode');
+		downloadGcode(document, file, 'retraction1.gcode');
+		initializedAlgorithm = true;
 	}
 </script>
 
@@ -66,7 +58,7 @@
 			<NumberInput bind:value={startRange} label="Start Range in mm" />
 		</Column>
 		<div class="h-4" />
-		{#if $algorithm.stepRanges.length > 1}
+		{#if !initializedAlgorithm}
 			<Button on:click={initAlgorithm}>Download gcode</Button>
 		{:else}
 			<Button kind="secondary" on:click={initAlgorithm}>Restart</Button>
@@ -79,6 +71,8 @@
 
 <div class="h-4" />
 
-{#each $algorithm.stepRanges as _}
-	<Step />
-{/each}
+{#if initializedAlgorithm}
+	{#each $algorithm.stepRanges as _}
+		<Step />
+	{/each}
+{/if}
