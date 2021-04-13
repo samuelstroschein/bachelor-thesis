@@ -17,7 +17,7 @@ class AlgorithmV1:
                if len(self.step_ranges) > 1 else True)
         result = []
         current_range = self.step_ranges[-1]
-        values_to_generate = 5
+        values_to_generate = 6
         step_size = (current_range[0] - current_range[1]
                      ) / (values_to_generate - 1)
         next_value = current_range[1]  # start with lowest value
