@@ -4,22 +4,27 @@
 	import { Column } from 'svelte-fluttered';
 	import { TextInput, Button } from 'carbon-components-svelte';
 
-	let endRange;
-	let startRange;
-
-	function advanceAlgortihm() {}
+	let endRange: string;
+	let startRange: string;
 </script>
 
 <h3>Step {$algorithm.stepRanges.length}</h3>
 <Column>
-	<TextInput inline bind:value={endRange} labelText="Best segment" placeholder="a,b,c,d,e or f" />
+	<TextInput
+		inline
+		invalid={!'abcdef'.includes(endRange)}
+		bind:value={endRange}
+		labelText="Best segment"
+		placeholder="a,b,c,d,e or f"
+	/>
 	<div class="h-2" />
 	<TextInput
 		inline
+		invalid={!'abcdef'.includes(startRange)}
 		bind:value={startRange}
 		labelText="Second best segment"
 		placeholder="a,b,c,d,e or f"
 	/>
 </Column>
 <div class="h-4" />
-<Button on:click={advanceAlgortihm}>Download gcode</Button>
+<Button on:click={() => null}>Download gcode</Button>
