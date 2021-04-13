@@ -115,7 +115,7 @@ export function generateRetractionGcode(
     if (abl == 5) {
         retraction = retraction.replace(/;G29 ; probe ABL/, "G29 L1 ; Load the mesh stored in slot 1\nG29 J ; Probe 3 points to tilt mesh");
     }
-
+    //@ts-ignore
     if (centre == true) {
         var retractionArray = retraction.split(/\n/g);
         var regexp = /X[0-9\.]+/;
