@@ -25,6 +25,7 @@
 		"tailwindcss": "^2.1.1"
 	},
 	"dependencies": {
-		"carbon-components-svelte": "^0.32.1"
+		"carbon-components-svelte": "^0.32.1",
+		"svelte-fluttered": "^0.3.0"
 	}
 }
