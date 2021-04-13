@@ -18,10 +18,20 @@
 	}
 
 	function nextStep() {
-		const x = alphabetCharacterToIndex(bestSegment);
-		const y = alphabetCharacterToIndex(secondBestSegment);
+		const index1 = alphabetCharacterToIndex(bestSegment);
+		const index2 = alphabetCharacterToIndex(secondBestSegment);
+		const x = $algorithm.stepSegments[$algorithm.stepSegments.length -1 ][index1]
+		const y = $algorithm.stepSegments[$algorithm.stepSegments.length -1 ][index2]
 		const newRange: [number, number] = x > y ? [x, y] : [y, x];
 		$algorithm.step(newRange);
+	}
+
+	function showBestSetting() {
+		alert(
+			`Your best Retraction Distance is in the range of ${
+				$algorithm.stepRanges[$algorithm.stepRanges.length - 1][0]
+			} and ${$algorithm.stepRanges[$algorithm.stepRanges.length - 1][1]}`
+		);
 	}
 </script>
 
@@ -50,6 +60,6 @@
 		secondBestSegment == '' ||
 		bestSegment == '' ||
 		secondBestSegment == bestSegment}
-	on:click={() => null}>Next Step</Button
+	on:click={nextStep}>Next Step</Button
 >
-<Button kind="secondary" on:click={() => null}>No More Improvement</Button>
+<Button kind="secondary" on:click={showBestSetting}>No More Improvement</Button>
