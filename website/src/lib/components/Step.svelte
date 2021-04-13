@@ -24,6 +24,8 @@
 		const y = $algorithm.stepSegments[$algorithm.stepSegments.length -1 ][index2]
 		const newRange: [number, number] = x > y ? [x, y] : [y, x];
 		$algorithm.step(newRange);
+		// forcefully refreshing the state
+		algorithm.update((_) => $algorithm)
 	}
 
 	function showBestSetting() {
