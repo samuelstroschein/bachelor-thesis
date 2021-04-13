@@ -15,11 +15,9 @@
 	let endRange: number = 6;
 	let startRange: number = 2;
 
-	let initializedAlgorithm = false;
-
 	function initAlgorithm() {
-		algorithm.set(new AlgorithmV1([endRange, startRange]));
-		const firstStep = $algorithm.step();
+		algorithm.set(new AlgorithmV1());
+		const firstStep = $algorithm.step([endRange, startRange]);
 		const segments: SegmentVariables[] = firstStep.map((retractionDistance) => {
 			return <SegmentVariables>{
 				retractionDistance: retractionDistance,
@@ -31,7 +29,6 @@
 		});
 		const file = gcodeAsBlob(generateRetractionGcode([220, 220], 200, 60, segments));
 		downloadGcode(document, file, 'retraction1.gcode');
-		initializedAlgorithm = true;
 	}
 </script>
 
@@ -58,7 +55,7 @@
 			<NumberInput bind:value={startRange} label="Start Range in mm" />
 		</Column>
 		<div class="h-4" />
-		{#if !initializedAlgorithm}
+		{#if $algorithm.stepRanges.length == 0}
 			<Button on:click={initAlgorithm}>Download gcode</Button>
 		{:else}
 			<Button kind="tertiary" on:click={initAlgorithm}>Restart</Button>
@@ -71,7 +68,7 @@
 
 <div class="h-4" />
 
-{#if initializedAlgorithm}
+{#if $algorithm.stepRanges.length > 0}
 	{#each $algorithm.stepRanges as _}
 		<Step />
 		<div class="h-4" />

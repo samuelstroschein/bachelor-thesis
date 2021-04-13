@@ -1,11 +1,8 @@
 export class AlgorithmV1 {
-    stepRanges: Array<[number, number]>
+    stepRanges: Array<[number, number]> = [];
 
-    constructor(startingRange: [number, number]) {
-        this.stepRanges = [startingRange]
-    }
-
-    step(): Array<number> {
+    step(range: [number, number]): Array<number> {
+        this.stepRanges.push(range)
         let result = []
         const currentRange = this.stepRanges[this.stepRanges.length - 1]
         const valuesToGenerate = 6
@@ -16,9 +13,5 @@ export class AlgorithmV1 {
             nextValue = Number((nextValue + stepSize).toFixed(2))
         }
         return result
-    }
-
-    setNextStepRange(range: [number, number]): void {
-        this.stepRanges.push(range)
     }
 }
