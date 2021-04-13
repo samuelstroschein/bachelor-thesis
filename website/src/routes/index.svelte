@@ -1,6 +1,7 @@
-<script>
+<script lang="ts">
+	let name: string = 'Hello';
 </script>
 
 <svelte:head>
-	<title>Hello</title>
+	<title>Printings</title>
 </svelte:head>
