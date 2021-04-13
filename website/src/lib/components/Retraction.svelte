@@ -54,7 +54,7 @@
 			<NumberInput bind:value={startRange} label="Start Range in mm" />
 		</Column>
 		<div class="h-4" />
-		<Button on:click={initAlgorithm}>Generate gcode</Button>
+		<Button on:click={initAlgorithm}>Download gcode</Button>
 	</div>
 	<div class="w-96">
 		<img src="retraction_diagram.jpeg" alt="" />
