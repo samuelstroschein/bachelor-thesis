@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>Printings</title>
+	<title>Bachelor Thesis</title>
 </svelte:head>
 
 <Retraction />

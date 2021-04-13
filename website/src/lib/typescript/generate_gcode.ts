@@ -22,7 +22,8 @@ export function generateRetractionGcode(
     bedTemperature: number,
     segments: Array<SegmentVariables>
 ) {
-    var centre = true;
+    // centre is for delta printers
+    var centre = false;
     var bedX = Math.round((bedDimensions[0] - 100) / 2);
     var bedY = Math.round((bedDimensions[1] - 100) / 2);
     var abl = 0
