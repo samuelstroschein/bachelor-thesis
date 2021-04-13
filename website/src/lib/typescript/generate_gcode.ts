@@ -1,8 +1,9 @@
 import { retractionTemplate } from './retraction_template'
+import { saveAs } from 'file-saver'
 
 
 export interface SegmentVariables {
-    retractionDistace: number
+    retractionDistance: number
     retractionSpeed: number
     extraRestartDistance: number
     prime: number
@@ -10,8 +11,14 @@ export interface SegmentVariables {
 }
 
 
+export function downloadGcode(filename: string, gcode: string) {
+    const blob = new Blob([gcode], { type: 'text/plain' });
+    saveAs(blob, `${filename}.gcode`)
+}
+
+
 // partially adjusted from https://github.com/teachingtechYT/teachingtechYT.github.io
-export function processRetraction(
+export function generateRetractionGcode(
     bedDimensions: [number, number],
     hotEndTemperature: number,
     bedTemperature: number,
@@ -23,32 +30,32 @@ export function processRetraction(
     var abl = 0
     var pc = "0"
     var pcResume = 255;
-    var a1 = segments[0].retractionDistace
+    var a1 = segments[0].retractionDistance
     var a2 = segments[0].retractionSpeed * 60
     var a3 = segments[0].extraRestartDistance
     var a4 = segments[0].prime * 60;
     var a5 = segments[0].zHop;
-    var b1 = segments[1].retractionDistace
+    var b1 = segments[1].retractionDistance
     var b2 = segments[1].retractionSpeed * 60
     var b3 = segments[1].extraRestartDistance
     var b4 = segments[1].prime * 60;
     var b5 = segments[1].zHop;
-    var c1 = segments[2].retractionDistace
+    var c1 = segments[2].retractionDistance
     var c2 = segments[2].retractionSpeed * 60
     var c3 = segments[2].extraRestartDistance
     var c4 = segments[2].prime * 60;
     var c5 = segments[2].zHop;
-    var d1 = segments[3].retractionDistace
+    var d1 = segments[3].retractionDistance
     var d2 = segments[3].retractionSpeed * 60
     var d3 = segments[3].extraRestartDistance
     var d4 = segments[3].prime * 60;
     var d5 = segments[3].zHop;
-    var e1 = segments[4].retractionDistace
+    var e1 = segments[4].retractionDistance
     var e2 = segments[4].retractionSpeed * 60
     var e3 = segments[4].extraRestartDistance
     var e4 = segments[4].prime * 60;
     var e5 = segments[4].zHop;
-    var f1 = segments[5].retractionDistace
+    var f1 = segments[5].retractionDistance
     var f2 = segments[5].retractionSpeed * 60
     var f3 = segments[5].extraRestartDistance
     var f4 = segments[5].prime * 60;
