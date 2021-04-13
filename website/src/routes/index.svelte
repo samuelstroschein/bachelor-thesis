@@ -1,8 +1,10 @@
 <script lang="ts">
+	// @ts-ignore
+	import Retraction from './../lib/components/Retraction.svelte';
 </script>
 
 <svelte:head>
 	<title>Printings</title>
 </svelte:head>
 
-<h1>Hello, how are ydu?</h1>
+<Retraction />
