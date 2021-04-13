@@ -1,4 +1,4 @@
-class AlgorithmV1 {
+export class AlgorithmV1 {
     stepRanges: Array<[number, number]>
 
     constructor(startingRange: [number, number]) {

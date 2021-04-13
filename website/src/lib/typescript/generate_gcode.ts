@@ -1,7 +1,7 @@
 import { retractionTemplate } from './retraction_template'
 
 
-interface SegmentVariables {
+export interface SegmentVariables {
     retractionDistace: number
     retractionSpeed: number
     extraRestartDistance: number
@@ -11,7 +11,7 @@ interface SegmentVariables {
 
 
 // partially adjusted from https://github.com/teachingtechYT/teachingtechYT.github.io
-function processRetraction(
+export function processRetraction(
     bedDimensions: [number, number],
     hotEndTemperature: number,
     bedTemperature: number,

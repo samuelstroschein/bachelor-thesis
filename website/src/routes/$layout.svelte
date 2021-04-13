@@ -3,6 +3,6 @@
 	import '../app.postcss';
 </script>
 
-<div class="mx-auto max-w-screen-lg">
+<div class="mx-auto max-w-screen-lg p-4">
 	<slot />
 </div>
