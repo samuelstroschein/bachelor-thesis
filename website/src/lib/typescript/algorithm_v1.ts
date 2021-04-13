@@ -7,9 +7,9 @@ export class AlgorithmV1 {
 
     step(): Array<number> {
         let result = []
-        const currentRange = this.stepRanges[-1]
+        const currentRange = this.stepRanges[this.stepRanges.length - 1]
         const valuesToGenerate = 6
-        const stepSize = (currentRange[0] = currentRange[1]) / (valuesToGenerate - 1)
+        const stepSize = (currentRange[0] - currentRange[1]) / (valuesToGenerate - 1)
         let nextValue = currentRange[1]
         for (let i = 0; i < valuesToGenerate; i++) {
             result.push(nextValue)
