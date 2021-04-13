@@ -61,7 +61,7 @@
 		{#if !initializedAlgorithm}
 			<Button on:click={initAlgorithm}>Download gcode</Button>
 		{:else}
-			<Button kind="secondary" on:click={initAlgorithm}>Restart</Button>
+			<Button kind="tertiary" on:click={initAlgorithm}>Restart</Button>
 		{/if}
 	</div>
 	<div class="w-96">
@@ -74,5 +74,6 @@
 {#if initializedAlgorithm}
 	{#each $algorithm.stepRanges as _}
 		<Step />
+		<div class="h-4" />
 	{/each}
 {/if}
