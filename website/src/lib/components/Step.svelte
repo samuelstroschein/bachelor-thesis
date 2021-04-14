@@ -3,6 +3,12 @@
 	// @ts-ignore
 	import { Column } from 'svelte-fluttered';
 	import { TextInput, Button } from 'carbon-components-svelte';
+	import {
+		downloadGcode,
+		gcodeAsBlob,
+		generateRetractionGcode
+	} from './../typescript/generate_gcode';
+	import type { SegmentVariables } from './../typescript/generate_gcode';
 
 	let bestSegment: string;
 	let secondBestSegment: string;
@@ -20,12 +26,24 @@
 	function nextStep() {
 		const index1 = alphabetCharacterToIndex(bestSegment);
 		const index2 = alphabetCharacterToIndex(secondBestSegment);
-		const x = $algorithm.stepSegments[$algorithm.stepSegments.length -1 ][index1]
-		const y = $algorithm.stepSegments[$algorithm.stepSegments.length -1 ][index2]
+		const x = $algorithm.stepSegments[$algorithm.stepSegments.length - 1][index1];
+		const y = $algorithm.stepSegments[$algorithm.stepSegments.length - 1][index2];
 		const newRange: [number, number] = x > y ? [x, y] : [y, x];
-		$algorithm.step(newRange);
+		const nextStep = $algorithm.step(newRange);
 		// forcefully refreshing the state
-		algorithm.update((_) => $algorithm)
+		algorithm.update((_) => $algorithm);
+		const segments: SegmentVariables[] = nextStep.map((retractionDistance) => {
+			return <SegmentVariables>{
+				retractionDistance: retractionDistance,
+				retractionSpeed: 40,
+				extraRestartDistance: 0,
+				prime: 40,
+				zHop: 0
+			};
+		});
+		const file = gcodeAsBlob(generateRetractionGcode([220, 220], 200, 60, segments));
+		const stepNumber = $algorithm.stepRanges.length;
+		downloadGcode(document, file, `retraction${stepNumber}.gcode`);
 	}
 
 	function showBestSetting() {
