@@ -5,6 +5,7 @@ prime_speed = range(30,60)
 """
 
 # %%
+from bayes_opt import UtilityFunction
 import nevergrad as ng
 import numpy as np
 from bayes_opt import BayesianOptimization
@@ -23,20 +24,28 @@ TRUTH_VALUE = np.array([
 
 def objective_function_vector(x: np.ndarray) -> float:
     """
-    Caluclates the absolute distance of x to the TRUTH_VALUE.
+    Caluclates the absolute distance of x to the TRUTH_VALUE squared.
     """
-    return -1 * abs(np.sum(np.subtract(TRUTH_VALUE, x)))
+    result = [
+        abs((TRUTH_VALUE[0]*10 - x[0] * 10)) ** 2,
+        abs(TRUTH_VALUE[1] - x[1]) ** 2,
+        abs(TRUTH_VALUE[2] - x[2]) ** 2,
+    ]
+    return -1 * abs(np.sum(result))
 
 
 def objective_function_variables(x: float, y: float, z: float) -> float:
     """
     Caluclates the absolute distance of x to the TRUTH_VALUE.
     """
-    return -1 * abs(np.sum(np.subtract(TRUTH_VALUE, np.array([x * 10, y, z])))) 
+    return objective_function_vector(np.array([x, y, z]))
 
 # %%
 
+
 pbounds = {'x': (2, 10), 'y': (30, 60), 'z': (30, 60)}
+
+# %% Automatic steps
 
 optimizer = BayesianOptimization(
     f=objective_function_variables,
@@ -47,7 +56,7 @@ optimizer = BayesianOptimization(
 
 # set first initial point
 optimizer.probe(
-    params=[2, 30,30],
+    params=[2, 30, 30],
     lazy=True,
 )
 
@@ -59,10 +68,50 @@ optimizer.probe(
 
 optimizer.maximize(
     init_points=0,
-    n_iter=8,
+    n_iter=80,
     kappa=1.75
 )
 
 print(optimizer.max)
 
+# %% Manual ask/tell steps
+
+optimizer = BayesianOptimization(
+    f=None,
+    pbounds=pbounds,
+    verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
+    random_state=10,
+)
+
+utility = UtilityFunction(kind="ucb", kappa=2, xi=0.0)
+
+for i in range(4):
+    next_point = optimizer.suggest(utility)
+    print(next_point)
+    rank = objective_function_variables(
+        next_point['x'], next_point['y'], next_point['z'])
+    optimizer.register(params=next_point, target=rank)
+
+# %%
+
+
+def black_box_function(x, y):
+    return -x ** 2 - (y - 1) ** 2 + 1
+
+
+optimizer = BayesianOptimization(
+    f=None,
+    pbounds={'x': (-2, 2), 'y': (-3, 3)},
+    verbose=2,
+    random_state=1,
+)
+
+
+for _ in range(5):
+    next_point = optimizer.suggest(utility)
+    target = black_box_function(**next_point)
+    optimizer.register(params=next_point, target=target)
+
+    print(target, next_point)
+print(optimizer.max)
 # %%
