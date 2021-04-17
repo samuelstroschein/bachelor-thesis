@@ -1,3 +1,4 @@
+from ast import literal_eval as make_tuple
 from typing import List, Tuple
 
 
@@ -28,3 +29,11 @@ class AlgorithmV1:
 
     def set_next_step_range(self, range: Tuple[float, float]) -> None:
         self.step_ranges.append(range)
+
+
+algo = AlgorithmV1((6, 0))
+while True:
+    print(algo.step())
+    new_range = make_tuple(
+        input("Give new range in form of (x,y) where x > y"))
+    algo.set_next_step_range(new_range)
