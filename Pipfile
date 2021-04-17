@@ -7,9 +7,10 @@ name = "pypi"
 mypy = "*"
 nevergrad = "==0.4.3.post2"
 jupyter = "*"
+bayesian-optimization = "*"
 
 [dev-packages]
 autopep8 = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.7"
