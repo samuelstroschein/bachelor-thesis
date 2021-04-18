@@ -6,6 +6,19 @@ import plotly.express as px
 import plotly.graph_objects as go
 from nevergrad_algorithm_base import NevergradAlgorithmBase
 
+
+class Experiment:
+    def __init__(self,
+                 recommendation: list,
+                 loss_of_recommendation: float,
+                 losses: list,
+                 steps: list) -> None:
+        self.recommendation = recommendation
+        self.loss_of_recommendation = loss_of_recommendation
+        self.losses = losses
+        self.steps = steps
+
+
 TRUTH_VALUE = np.array([
     3,  # retraction_distance is 3 but * 10 to be equal to other parameters
     30,  # retraction_speed
@@ -27,21 +40,20 @@ def objective_function(x: Union[ng.p.Scalar, float],
     ]
     return abs(np.sum(result))
 
-
-# %%
-
-def run_experiment(algorithm, epochs: int) -> Tuple[list, list, float]:
+def run_experiment(algorithm, epochs: int) -> Experiment:
     """
-    Returns recommendation, all losses and loss of recommendation
+    Returns the recommendation, all losses and loss of recommendation
     """
+    steps = []
     losses = []
     for _ in range(epochs):  # type: ignore
         x = algorithm.step()
+        steps.append(x)
         loss = objective_function(*x.args)
         losses.append(loss)
         algorithm.tell_loss(x, loss)
     recommendation = algorithm.optimizer.provide_recommendation()
-    return recommendation.args, losses, objective_function(*recommendation.args)
+    return Experiment(recommendation.args, objective_function(*recommendation.args), losses, steps)
 
 
 # %%
@@ -50,16 +62,16 @@ epochs = 12
 
 figure = go.Figure()
 
-# ng_opt = run_experiment(NevergradAlgorithmBase(
-#     objective_function,
-#     ng.optimizers.NGOpt
-# ), epochs=epochs)
+ng_opt = run_experiment(NevergradAlgorithmBase(
+    objective_function,
+    ng.optimizers.NGOpt
+), epochs=epochs)
 
-# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=ng_opt[1],
-#                     mode='lines+markers',
-#                     name='ng_opt'))
+figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=ng_opt.losses,
+                    mode='lines+markers',
+                    name='ng_opt'))
 
-#* ------- no good performance  -------------
+# * ------- no good performance  -------------
 # two_points_opt = run_experiment(NevergradAlgorithmBase(
 #     objective_function,
 #     ng.optimizers.TwoPointsDE
@@ -77,19 +89,19 @@ figure = go.Figure()
 # figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=portfolio_discrete_one_plus_one[1],
 #                     mode='lines+markers',
 #                     name='portfolio_discrete_one_plus_one'))
-#* -------------------------------------
+# * -------------------------------------
 
 # one_plus_one = run_experiment(NevergradAlgorithmBase(
 #     objective_function,
 #     ng.optimizers.OnePlusOne
 # ), epochs=epochs)
 
-# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=one_plus_one[1],
+# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=one_plus_one.losses,
 #                     mode='lines+markers',
 #                     name='one_plus_one'))
 
 bayesian1 = run_experiment(NevergradAlgorithmBase(
-    objective_function, 
+    objective_function,
     ng.families.ParametrizedBO(
         utility_kind="ucb",
         utility_kappa=2,
@@ -97,22 +109,22 @@ bayesian1 = run_experiment(NevergradAlgorithmBase(
     )
 ), epochs=epochs)
 
-figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=bayesian1[1],
-                    mode='lines+markers',
-                    name='bayesian1'))
+figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
+                            mode='lines+markers',
+                            name='bayesian1'))
 
-bayesian2 = run_experiment(NevergradAlgorithmBase(
-    objective_function, 
-    ng.families.ParametrizedBO(
-        utility_kind="ucb",
-        utility_kappa=1.75,
-        utility_xi=1
-    )
-), epochs=epochs)
+# bayesian2 = run_experiment(NevergradAlgorithmBase(
+#     objective_function,
+#     ng.families.ParametrizedBO(
+#         utility_kind="ucb",
+#         utility_kappa=2,
+#         utility_xi=1
+#     )
+# ), epochs=epochs)
 
-figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=bayesian2[1],
-                    mode='lines+markers',
-                    name='bayesian2'))
+# figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
+#                             mode='lines+markers',
+#                             name='bayesian2'))
 
 figure.show()
 
