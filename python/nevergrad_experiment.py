@@ -36,11 +36,6 @@ def run_experiment(algorithm, epochs: int) -> Experiment:
 
 
 # %%
-
-epochs = 12
-
-figure = go.Figure()
-
 # ng_opt = run_experiment(NevergradAlgorithmBase(
 #     objective_function,
 #     ng.optimizers.NGOpt
@@ -79,6 +74,10 @@ figure = go.Figure()
 #                     mode='lines+markers',
 #                     name='one_plus_one'))
 
+# %%
+epochs = 12
+
+figure = go.Figure()
 
 bayesian1 = run_experiment(NevergradAlgorithmBase(
     objective_function_v1,
