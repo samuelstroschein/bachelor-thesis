@@ -27,13 +27,12 @@ def objective_function(x: ng.p.Scalar,
 
 # %%
 
-
 algorithm = NevergradAlgorithmBase(
     objective_function, ng.optimizers.NGOpt)
-
-
 for _ in range(20):  # type: ignore
-    algorithm.step()
+    x = algorithm.step()
+    loss = objective_function(*x.args)
+    algorithm.tell_loss(x, loss)
 
 recommendation = algorithm.optimizer.provide_recommendation()
 print('\n')

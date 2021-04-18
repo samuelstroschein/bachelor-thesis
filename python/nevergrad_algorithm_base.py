@@ -1,4 +1,5 @@
 import nevergrad as ng
+from nevergrad.optimization.base import Optimizer
 import numpy as np
 from typing import Tuple
 
@@ -32,8 +33,12 @@ class NevergradAlgorithmBase:
             num_workers=1
         )
 
-    def step(self):
+    def step(self) -> Optimizer:
         x = self.optimizer.ask()
-        # print(x.args)
-        loss = self.objective_function(*x.args)
+        return x
+        # # print(x.args)
+        # loss = self.objective_function(*x.args)
+        # self.optimizer.tell(x, loss)
+
+    def tell_loss(self, x: Optimizer, loss: float) -> None:
         self.optimizer.tell(x, loss)
