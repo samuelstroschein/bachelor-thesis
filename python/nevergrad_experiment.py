@@ -1,10 +1,10 @@
 # %%
-from typing import Tuple, Union
 import nevergrad as ng
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from nevergrad_algorithm_base import NevergradAlgorithmBase
+from objective_functions import objective_function_v1
 
 
 class Experiment:
@@ -19,27 +19,6 @@ class Experiment:
         self.steps = steps
 
 
-TRUTH_VALUE = np.array([
-    3,  # retraction_distance is 3 but * 10 to be equal to other parameters
-    30,  # retraction_speed
-    40   # prime_speed
-])
-
-
-def objective_function(x: Union[ng.p.Scalar, float],
-                       y: Union[ng.p.Scalar, float],
-                       z: Union[ng.p.Scalar, float],
-                       ) -> float:
-    """
-    Caluclates the absolute distance of x to the TRUTH_VALUE squared.
-    """
-    result = [
-        abs((TRUTH_VALUE[0]*10 - x*10)) ** 2,
-        abs(TRUTH_VALUE[1] - y) ** 2,
-        abs(TRUTH_VALUE[2] - z) ** 2,
-    ]
-    return abs(np.sum(result))
-
 def run_experiment(algorithm, epochs: int) -> Experiment:
     """
     Returns the recommendation, all losses and loss of recommendation
@@ -49,11 +28,11 @@ def run_experiment(algorithm, epochs: int) -> Experiment:
     for _ in range(epochs):  # type: ignore
         x = algorithm.step()
         steps.append(x)
-        loss = objective_function(*x.args)
+        loss = objective_function_v1(*x.args)
         losses.append(loss)
         algorithm.tell_loss(x, loss)
     recommendation = algorithm.optimizer.provide_recommendation()
-    return Experiment(recommendation.args, objective_function(*recommendation.args), losses, steps)
+    return Experiment(recommendation.args, objective_function_v1(*recommendation.args), losses, steps)
 
 
 # %%
@@ -102,7 +81,7 @@ figure = go.Figure()
 
 
 bayesian1 = run_experiment(NevergradAlgorithmBase(
-    objective_function,
+    objective_function_v1,
     ng.families.ParametrizedBO(
         utility_kind="ei",
         utility_kappa=1,
@@ -115,7 +94,7 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
                             name='bayesian1'))
 
 bayesian2 = run_experiment(NevergradAlgorithmBase(
-    objective_function,
+    objective_function_v1,
     ng.families.ParametrizedBO(
         utility_kind="ei",
         utility_kappa=1,

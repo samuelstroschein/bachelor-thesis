@@ -1,6 +1,5 @@
 import nevergrad as ng
 from nevergrad.optimization.base import Optimizer
-import numpy as np
 from typing import Tuple
 
 
