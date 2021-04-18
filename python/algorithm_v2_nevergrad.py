@@ -19,7 +19,7 @@ def objective_function(x: np.ndarray) -> float:
     Caluclates the absolute distance of x to the TRUTH_VALUE squared.
     """
     result = [
-        abs((TRUTH_VALUE[0]*10 - x[0] * 10)) ** 2,
+        abs((TRUTH_VALUE[0]*10 - x[0]*10)) ** 2,
         abs(TRUTH_VALUE[1] - x[1]) ** 2,
         abs(TRUTH_VALUE[2] - x[2]) ** 2,
     ]
