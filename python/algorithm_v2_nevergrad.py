@@ -1,11 +1,44 @@
 # %%
 import nevergrad as ng
 import numpy as np
+from typing import Tuple
 
 
-RETRACTION_DISTANCE = range(2, 11)
-RETRACTION_SPEED = range(30, 61)
-PRIME_SPEED = range(30, 61)
+class NevergradAlgorithmBase:
+    def __init__(self,
+                 objective_function,
+                 optimizer,
+                 retraction_distance_range: Tuple[float, float] = (2, 10),
+                 retraction_speed_range: Tuple[float, float] = (30, 60),
+                 prime_speed_range: Tuple[float, float] = (30, 60),
+                 ) -> None:
+        self.objective_function = objective_function
+        instrumentation = instrumentation = ng.p.Instrumentation(
+            ng.p.Scalar(
+                lower=retraction_distance_range[0],
+                upper=retraction_distance_range[1]
+            ),
+            ng.p.Scalar(
+                lower=retraction_speed_range[0],
+                upper=retraction_speed_range[1]
+            ),
+            ng.p.Scalar(
+                lower=prime_speed_range[0],
+                upper=prime_speed_range[1]
+            ),
+        )
+        self.optimizer = optimizer(
+            parametrization=instrumentation,
+            budget=5,
+            num_workers=1
+        )
+
+    def step(self):
+        x = self.optimizer.ask()
+        print(x.args)
+        loss = self.objective_function(*x.args)
+        self.optimizer.tell(x, loss)
+
 
 TRUTH_VALUE = np.array([
     3,  # retraction_distance is 3 but * 10 to be equal to other parameters
@@ -36,36 +69,15 @@ def objective_function_variables(
 # %%
 
 
-instrumentation = ng.p.Instrumentation(
-    ng.p.Scalar(
-        lower=RETRACTION_DISTANCE[0],
-        upper=RETRACTION_DISTANCE[-1]
-    ),
-    ng.p.Scalar(
-        lower=RETRACTION_SPEED[0],
-        upper=RETRACTION_SPEED[-1]
-    ),
-    ng.p.Scalar(
-        lower=PRIME_SPEED[0],
-        upper=PRIME_SPEED[-1]
-    ),
-)
+algorithm = NevergradAlgorithmBase(
+    objective_function_variables, ng.optimizers.NGOpt)
 
-optimizer = ng.optimizers.NGOpt(
-    parametrization=instrumentation,
-    budget=5,
-    num_workers=1
-)
 
-# optimizer.suggest([5, 50, 50])
+for _ in range(20):  # type: ignore
+    algorithm.step()
 
-for _ in range(optimizer.budget):  # type: ignore
-    x = optimizer.ask()
-    print(x.args)
-    loss = objective_function_variables(*x.args)
-    optimizer.tell(x, loss)
-
-recommendation = optimizer.provide_recommendation()
-print(recommendation.args)
+recommendation = algorithm.optimizer.provide_recommendation()
+print('\n')
+print(f'recommendation: {recommendation.args}\ntruth value: {TRUTH_VALUE}')
 
 # %%
