@@ -5,13 +5,11 @@ from typing import Tuple
 
 class NevergradAlgorithmBase:
     def __init__(self,
-                 objective_function,
                  optimizer,
                  retraction_distance_range: Tuple[float, float] = (2, 10),
                  retraction_speed_range: Tuple[float, float] = (30, 60),
                  prime_speed_range: Tuple[float, float] = (30, 60),
                  ) -> None:
-        self.objective_function = objective_function
         instrumentation = instrumentation = ng.p.Instrumentation(
             ng.p.Scalar(
                 lower=retraction_distance_range[0],

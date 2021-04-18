@@ -80,7 +80,6 @@ epochs = 12
 figure = go.Figure()
 
 bayesian1 = run_experiment(NevergradAlgorithmBase(
-    objective_function_v1,
     ng.families.ParametrizedBO(
         utility_kind="ei",
         utility_kappa=1,
@@ -93,7 +92,6 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
                             name='bayesian1'))
 
 bayesian2 = run_experiment(NevergradAlgorithmBase(
-    objective_function_v1,
     ng.families.ParametrizedBO(
         utility_kind="ei",
         utility_kappa=1,
