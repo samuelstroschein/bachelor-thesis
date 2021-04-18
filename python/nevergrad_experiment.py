@@ -62,14 +62,14 @@ epochs = 12
 
 figure = go.Figure()
 
-ng_opt = run_experiment(NevergradAlgorithmBase(
-    objective_function,
-    ng.optimizers.NGOpt
-), epochs=epochs)
+# ng_opt = run_experiment(NevergradAlgorithmBase(
+#     objective_function,
+#     ng.optimizers.NGOpt
+# ), epochs=epochs)
 
-figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=ng_opt.losses,
-                    mode='lines+markers',
-                    name='ng_opt'))
+# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=ng_opt.losses,
+#                     mode='lines+markers',
+#                     name='ng_opt'))
 
 # * ------- no good performance  -------------
 # two_points_opt = run_experiment(NevergradAlgorithmBase(
@@ -100,12 +100,13 @@ figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=ng_opt.losses,
 #                     mode='lines+markers',
 #                     name='one_plus_one'))
 
+
 bayesian1 = run_experiment(NevergradAlgorithmBase(
     objective_function,
     ng.families.ParametrizedBO(
-        utility_kind="ucb",
-        utility_kappa=2,
-        utility_xi=1
+        utility_kind="ei",
+        utility_kappa=1,
+        utility_xi=0
     )
 ), epochs=epochs)
 
@@ -113,18 +114,18 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
                             mode='lines+markers',
                             name='bayesian1'))
 
-# bayesian2 = run_experiment(NevergradAlgorithmBase(
-#     objective_function,
-#     ng.families.ParametrizedBO(
-#         utility_kind="ucb",
-#         utility_kappa=2,
-#         utility_xi=1
-#     )
-# ), epochs=epochs)
+bayesian2 = run_experiment(NevergradAlgorithmBase(
+    objective_function,
+    ng.families.ParametrizedBO(
+        utility_kind="ei",
+        utility_kappa=1,
+        utility_xi=0.5
+    )
+), epochs=epochs)
 
-# figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
-#                             mode='lines+markers',
-#                             name='bayesian2'))
+figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
+                            mode='lines+markers',
+                            name='bayesian2'))
 
 figure.show()
 
