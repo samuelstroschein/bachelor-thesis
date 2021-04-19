@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 import nevergrad as ng
 import numpy as np
 
@@ -14,7 +14,7 @@ def objective_function_v1(x: Union[ng.p.Scalar, float],
                           z: Union[ng.p.Scalar, float],
                           ) -> float:
     """
-    Caluclates the absolute distance of all values to the TRUTH_VALUEs squared.
+    Calculates the absolute distance of all values to the TRUTH_VALUEs squared.
     Furthermore, multiplies x by 10 to get it to the same levels of y and z
     """
     result = [
@@ -23,3 +23,17 @@ def objective_function_v1(x: Union[ng.p.Scalar, float],
         abs(TRUTH_VALUE[2] - z) ** 2,
     ]
     return abs(np.sum(result))
+
+
+def objective_function_v2_lego(x: Union[ng.p.Scalar, float],
+                               y: Union[ng.p.Scalar, float],
+                               z: Union[ng.p.Scalar, float],
+                               ranking: List[List],
+                               ) -> float:
+    """
+    X,y,z are transformed into a list and then searched for in the
+    ranking list. The index position of the search is the returned value. 
+
+    E.g. [x,y,z], ranking = [[30,45,2], [x,y,z]] -> returns 1 
+    """
+    return ranking.index([x, y, z])
