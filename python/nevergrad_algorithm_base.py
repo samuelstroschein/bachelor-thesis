@@ -6,11 +6,16 @@ from typing import Tuple
 class NevergradAlgorithmBase:
     def __init__(self,
                  optimizer,
+                #  temperature_range: Tuple[float, float] = (180, 220),
                  retraction_distance_range: Tuple[float, float] = (2, 10),
                  retraction_speed_range: Tuple[float, float] = (30, 60),
-                 prime_speed_range: Tuple[float, float] = (30, 60),
+                #  prime_speed_range: Tuple[float, float] = (30, 60),
                  ) -> None:
         instrumentation = instrumentation = ng.p.Instrumentation(
+            # ng.p.Scalar(
+            #     lower=temperature_range[0],
+            #     upper=temperature_range[1]
+            # ),
             ng.p.Scalar(
                 lower=retraction_distance_range[0],
                 upper=retraction_distance_range[1]
@@ -19,10 +24,10 @@ class NevergradAlgorithmBase:
                 lower=retraction_speed_range[0],
                 upper=retraction_speed_range[1]
             ),
-            ng.p.Scalar(
-                lower=prime_speed_range[0],
-                upper=prime_speed_range[1]
-            ),
+            # ng.p.Scalar(
+            #     lower=prime_speed_range[0],
+            #     upper=prime_speed_range[1]
+            # ),
         )
         self.optimizer = optimizer(
             parametrization=instrumentation,
