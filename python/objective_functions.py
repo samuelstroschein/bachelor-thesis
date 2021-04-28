@@ -31,7 +31,7 @@ def objective_function_v1(x: Union[ng.p.Scalar, float],
 # rank: 1, rating: 2 -> 0 = bad, 1 = neutral, 2 = good
 def objective_function_v2_lego(x: Union[ng.p.Scalar, float],
                                y: Union[ng.p.Scalar, float],
-                               #    z: Union[ng.p.Scalar, float],
+                               z: Union[ng.p.Scalar, float],
                                ranking: List[List],
                                ) -> float:
     """
@@ -40,5 +40,5 @@ def objective_function_v2_lego(x: Union[ng.p.Scalar, float],
 
     E.g. [x,y,z], ranking = [[30,45,2], [x,y,z]] -> returns 1 
     """
-    # return ranking.index([x, y, z])
-    return ranking.index([x, y])
+    return ranking.index([x, y, z])
+    # return ranking.index([x, y])
