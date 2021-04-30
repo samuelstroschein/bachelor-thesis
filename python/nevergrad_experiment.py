@@ -52,31 +52,42 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     )
     # steps = tuple (step, loss from objective_function_v1)
     steps: List[Tuple] = [
-        (list(first_step.args), objective_function_v3(*first_step.args)),
-        (list(second_step.args), objective_function_v3(*second_step.args)),
+        (first_step, objective_function_v3(*first_step.args)),
+        (second_step, objective_function_v3(*second_step.args)),
     ]
     # tell the initial ranking
     # initial ranking
-    intial_ranking: Any = [steps[0][0], steps[1][0]]
+    intial_ranking: Any = [list(steps[0][0].args), list(steps[1][0].args)]
 
     algorithm.tell_loss(first_step, objective_function_v2(  # type: ignore
-        *steps[0][0], intial_ranking
+        *steps[0][0].args, intial_ranking
     ))  # type: ignore
     algorithm.tell_loss(second_step, objective_function_v2(  # type: ignore
-        *steps[1][0], intial_ranking
+        *steps[1][0].args, intial_ranking
     ))  # type: ignore
     for _ in range(epochs):  # type: ignore
         step = algorithm.step()
         loss = objective_function_v3(*step.args)
-        steps.append((list(step.args), loss))
+        steps.append((step, loss))
         ranking: Any = steps.copy()
         # sort by loss
         ranking.sort(key=lambda x: x[1])
         # remove loss value
-        ranking = list(map(lambda x: list(x[0]), ranking))
-        algorithm.tell_loss(
-            step, objective_function_v2(*step.args, ranking)  # type: ignore
-        )
+        ranking = list(map(lambda x: list(x[0].args), ranking))
+        # recreate the algorithm in order to take new ranking into account
+        algorithm = NevergradAlgorithmBase(
+            ng.families.ParametrizedBO(
+                utility_kind='ei',
+                utility_kappa=1,
+                utility_xi=0,
+                gp_parameters={'alpha': 1}
+            ))
+        # tell new ranking
+        for step in steps:
+            algorithm.tell_loss(step[0], objective_function_v2(  # type: ignore
+                *step[0].args, ranking)
+            )
+
     recommendation = algorithm.optimizer.provide_recommendation()
     final_ranking: Any = steps
     # sort by loss
