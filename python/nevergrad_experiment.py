@@ -69,7 +69,7 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
         step = algorithm.step()
         loss = objective_function_v1(*step.args)
         steps.append((list(step.args), loss))
-        ranking: Any = steps
+        ranking: Any = steps.copy()
         # sort by loss
         ranking.sort(key=lambda x: x[1])
         # remove loss value
