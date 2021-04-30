@@ -19,7 +19,7 @@ class Experiment:
         self.steps = steps
 
 
-def run_experiment(algorithm, epochs: int) -> Experiment:
+def run_experiment_v1(algorithm, epochs: int) -> Experiment:
     """
     Returns the recommendation, all losses and loss of recommendation
     """
@@ -36,50 +36,11 @@ def run_experiment(algorithm, epochs: int) -> Experiment:
 
 
 # %%
-# ng_opt = run_experiment(NevergradAlgorithmBase(
-#     objective_function,
-#     ng.optimizers.NGOpt
-# ), epochs=epochs)
-
-# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=ng_opt.losses,
-#                     mode='lines+markers',
-#                     name='ng_opt'))
-
-# * ------- no good performance  -------------
-# two_points_opt = run_experiment(NevergradAlgorithmBase(
-#     objective_function,
-#     ng.optimizers.TwoPointsDE
-# ), epochs=epochs)
-
-# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=two_points_opt[1],
-#                     mode='lines+markers',
-#                     name='two_points_opt'))
-
-# portfolio_discrete_one_plus_one = run_experiment(NevergradAlgorithmBase(
-#     objective_function,
-#     ng.optimizers.PortfolioDiscreteOnePlusOne
-# ), epochs=epochs)
-
-# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=portfolio_discrete_one_plus_one[1],
-#                     mode='lines+markers',
-#                     name='portfolio_discrete_one_plus_one'))
-# * -------------------------------------
-
-# one_plus_one = run_experiment(NevergradAlgorithmBase(
-#     objective_function,
-#     ng.optimizers.OnePlusOne
-# ), epochs=epochs)
-
-# figure.add_trace(go.Scatter(x=list(range(0,epochs)), y=one_plus_one.losses,
-#                     mode='lines+markers',
-#                     name='one_plus_one'))
-
-# %%
 epochs = 12
 
 figure = go.Figure()
 
-bayesian1 = run_experiment(NevergradAlgorithmBase(
+bayesian1 = run_experiment_v1(NevergradAlgorithmBase(
     ng.families.ParametrizedBO(
         utility_kind="ei",
         utility_kappa=1,
@@ -91,7 +52,7 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
                             mode='lines+markers',
                             name='bayesian1'))
 
-bayesian2 = run_experiment(NevergradAlgorithmBase(
+bayesian2 = run_experiment_v1(NevergradAlgorithmBase(
     ng.families.ParametrizedBO(
         utility_kind="ei",
         utility_kappa=1,
