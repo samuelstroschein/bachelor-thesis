@@ -25,7 +25,6 @@ class NevergradAlgorithmBase:
         )
         self.optimizer = optimizer(
             parametrization=self.instrumentation,
-            budget=30,
             num_workers=1
         )
 
