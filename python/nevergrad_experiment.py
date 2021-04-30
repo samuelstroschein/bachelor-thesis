@@ -77,18 +77,17 @@ def run_experiment_v2(algorithm_init, epochs: int) -> Experiment:
         ranking = list(map(lambda x: list(x[0].args), ranking))
         # recreate the algorithm in order to take new ranking into account
         algorithm = algorithm_init()
-        # tell new ranking
+        # algorithm.tell_loss(step, objective_function_v3(  # type: ignore
+        #     *step.args)
+        # )
+        # # tell new ranking
         for step in steps:
             algorithm.tell_loss(step[0], objective_function_v2(  # type: ignore
-                *step[0].args, ranking)
+                *step[0].args, ranking
+            )
             )
 
     recommendation = algorithm.optimizer.provide_recommendation()
-    final_ranking: Any = steps
-    # sort by loss
-    final_ranking.sort(key=lambda x: x[1])
-    # remove loss value
-    final_ranking = list(map(lambda x: list(x[0]), final_ranking))
 
     return Experiment(
         recommendation.args,
@@ -130,7 +129,7 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
 figure.show()
 
 # %%
-epochs = 100
+epochs = 50
 
 figure = go.Figure()
 
@@ -148,7 +147,7 @@ figure.add_trace(
         x=list(range(0, epochs)),
         y=experiment1.losses,
         mode='lines+markers',
-        name='experiment1'
+        name='experiment1',
     )
 )
 
@@ -170,36 +169,36 @@ figure.add_trace(
     )
 )
 
-experiment3 = run_experiment_v2(lambda: NevergradAlgorithmBase(
-    ng.families.ParametrizedBO(
-        utility_kind='ei',
-        utility_kappa=3,
-        utility_xi=1,
-        gp_parameters={'alpha': 1}
-    )
-), epochs=epochs)
+# experiment3 = run_experiment_v2(lambda: NevergradAlgorithmBase(
+#     ng.families.ParametrizedBO(
+#         utility_kind='ei',
+#         utility_kappa=3,
+#         utility_xi=1,
+#         gp_parameters={'alpha': 1}
+#     )
+# ), epochs=epochs)
 
-figure.add_trace(
-    go.Scatter(
-        x=list(range(0, epochs)),
-        y=experiment3.losses,
-        mode='lines+markers',
-        name='experiment3'
-    )
-)
+# figure.add_trace(
+#     go.Scatter(
+#         x=list(range(0, epochs)),
+#         y=experiment3.losses,
+#         mode='lines+markers',
+#         name='experiment3'
+#     )
+# )
 
-experiment4 = run_experiment_v2(lambda: NevergradAlgorithmBase(
-    ng.optimizers.RandomSearch
-), epochs=epochs)
+# experiment4 = run_experiment_v2(lambda: NevergradAlgorithmBase(
+#     ng.optimizers.RandomSearch
+# ), epochs=epochs)
 
-figure.add_trace(
-    go.Scatter(
-        x=list(range(0, epochs)),
-        y=experiment4.losses,
-        mode='lines+markers',
-        name='experiment4'
-    )
-)
+# figure.add_trace(
+#     go.Scatter(
+#         x=list(range(0, epochs)),
+#         y=experiment4.losses,
+#         mode='lines+markers',
+#         name='experiment4'
+#     )
+# )
 
 figure.show()
 
