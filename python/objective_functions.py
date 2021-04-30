@@ -29,7 +29,7 @@ def objective_function_v1(x: Union[ng.p.Scalar, float],
 # take "very good point" and "very bad point" into consideration.
 # after each print ask the user to rank and rate the print. For example:
 # rank: 1, rating: 2 -> 0 = bad, 1 = neutral, 2 = good
-def objective_function_v2_lego(x: Union[ng.p.Scalar, float],
+def objective_function_v2(x: Union[ng.p.Scalar, float],
                                y: Union[ng.p.Scalar, float],
                                z: Union[ng.p.Scalar, float],
                                ranking: List[List],
