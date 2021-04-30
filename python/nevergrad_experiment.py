@@ -4,8 +4,21 @@ import nevergrad as ng
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 from nevergrad_algorithm_base import NevergradAlgorithmBase
 from objective_functions import objective_function_v1, rank_function_v1, objective_function_v3
+
+
+def plot_optimization(bo):
+    x = np.linspace(-2, 10, 10000)
+    mean, sigma = bo._gp.predict(x.reshape(-1, 1), return_std=True)
+
+    plt.figure(figsize=(16, 9))
+    plt.plot(x, mean)
+    plt.fill_between(x, mean + sigma, mean - sigma, alpha=0.1)
+    plt.scatter(bo.space.params.flatten(),
+                bo.space.target, c="red", s=50, zorder=10)
+    plt.show()
 
 
 class Experiment:
@@ -13,11 +26,14 @@ class Experiment:
                  recommendation: list,
                  loss_of_recommendation: float,
                  losses: list,
-                 steps: list) -> None:
+                 steps: list,
+                 optimizer=None,
+                 ) -> None:
         self.recommendation = recommendation
         self.loss_of_recommendation = loss_of_recommendation
         self.losses = losses
         self.steps = steps
+        self.optimizer = optimizer
 
 
 def run_experiment_v1(algorithm, epochs: int) -> Experiment:
@@ -33,7 +49,7 @@ def run_experiment_v1(algorithm, epochs: int) -> Experiment:
         losses.append(loss)
         algorithm.tell_loss(x, loss)
     recommendation = algorithm.optimizer.provide_recommendation()
-    return Experiment(recommendation.args, objective_function_v1(*recommendation.args), losses, steps)
+    return Experiment(recommendation.args, objective_function_v1(*recommendation.args), losses, steps, algorithm.optimizer)
 
 
 def run_experiment_v2(algorithm_init, epochs: int) -> Experiment:
@@ -93,40 +109,41 @@ def run_experiment_v2(algorithm_init, epochs: int) -> Experiment:
         recommendation.args,
         0,  # loss is the 0 element in ranking so 0
         list(map(lambda x: x[1], steps)),
-        list(map(lambda x: x[0], steps))
+        list(map(lambda x: x[0], steps)),
+        algorithm.optimizer
     )
 
 
 # %%
-epochs = 12
+# epochs = 12
 
-figure = go.Figure()
+# figure = go.Figure()
 
-bayesian1 = run_experiment_v1(NevergradAlgorithmBase(
-    ng.families.ParametrizedBO(
-        utility_kind="ei",
-        utility_kappa=1,
-        utility_xi=0
-    )
-), epochs=epochs)
+# bayesian1 = run_experiment_v1(NevergradAlgorithmBase(
+#     ng.families.ParametrizedBO(
+#         utility_kind="ei",
+#         utility_kappa=1,
+#         utility_xi=0
+#     )
+# ), epochs=epochs)
 
-figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
-                            mode='lines+markers',
-                            name='bayesian1'))
+# figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian1.losses,
+#                             mode='lines+markers',
+#                             name='bayesian1'))
 
-bayesian2 = run_experiment_v1(NevergradAlgorithmBase(
-    ng.families.ParametrizedBO(
-        utility_kind="ei",
-        utility_kappa=1,
-        utility_xi=0.5
-    )
-), epochs=epochs)
+# bayesian2 = run_experiment_v1(NevergradAlgorithmBase(
+#     ng.families.ParametrizedBO(
+#         utility_kind="ei",
+#         utility_kappa=1,
+#         utility_xi=0.5
+#     )
+# ), epochs=epochs)
 
-figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
-                            mode='lines+markers',
-                            name='bayesian2'))
+# figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
+#                             mode='lines+markers',
+#                             name='bayesian2'))
 
-figure.show()
+# figure.show()
 
 # %%
 epochs = 50
@@ -198,3 +215,4 @@ figure.add_trace(
 figure.show()
 
 # %%
+plot_optimization(experiment1.optimizer.bo)
