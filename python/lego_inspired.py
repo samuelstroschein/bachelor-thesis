@@ -1,6 +1,6 @@
 import nevergrad as ng
 from nevergrad.optimization.base import Optimizer
-from objective_functions import objective_function_v2
+from objective_functions import rank_function_v1
 from nevergrad_algorithm_base import NevergradAlgorithmBase
 
 
@@ -18,9 +18,9 @@ steps = [algorithm.step(), algorithm.step()]
 ranking = [[*steps[0].args], [*steps[1].args]]  # type: ignore
 # tell the initial ranking
 algorithm.tell_loss(
-    steps[0], objective_function_v2(*steps[0].args, ranking))  # type: ignore
+    steps[0], rank_function_v1(*steps[0].args, ranking))  # type: ignore
 algorithm.tell_loss(
-    steps[1], objective_function_v2(*steps[1].args, ranking))  # type: ignore
+    steps[1], rank_function_v1(*steps[1].args, ranking))  # type: ignore
 
 print(f'First step {steps[0].args}')  # type:ignore
 print(f'Second step {steps[1].args}')  # type:ignore
@@ -40,7 +40,7 @@ for i in range(10):
     )
     # tell new ranking
     for step in steps:
-        algorithm.tell_loss(step, objective_function_v2(  # type: ignore
+        algorithm.tell_loss(step, rank_function_v1(  # type: ignore
             *step.args, ranking))  # type: ignore
 
 print(algorithm.optimizer.provide_recommendation().args)  # type:ignore

@@ -5,7 +5,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from nevergrad_algorithm_base import NevergradAlgorithmBase
-from objective_functions import objective_function_v1, objective_function_v2, objective_function_v3
+from objective_functions import objective_function_v1, rank_function_v1, objective_function_v3
 
 
 class Experiment:
@@ -60,10 +60,10 @@ def run_experiment_v2(algorithm_init, epochs: int) -> Experiment:
     # initial ranking
     intial_ranking: Any = [list(steps[0][0].args), list(steps[1][0].args)]
 
-    algorithm.tell_loss(first_step, objective_function_v2(  # type: ignore
+    algorithm.tell_loss(first_step, rank_function_v1(  # type: ignore
         *steps[0][0].args, intial_ranking
     ))  # type: ignore
-    algorithm.tell_loss(second_step, objective_function_v2(  # type: ignore
+    algorithm.tell_loss(second_step, rank_function_v1(  # type: ignore
         *steps[1][0].args, intial_ranking
     ))  # type: ignore
     for _ in range(epochs):  # type: ignore
@@ -82,7 +82,7 @@ def run_experiment_v2(algorithm_init, epochs: int) -> Experiment:
         # )
         # # tell new ranking
         for step in steps:
-            algorithm.tell_loss(step[0], objective_function_v2(  # type: ignore
+            algorithm.tell_loss(step[0], rank_function_v1(  # type: ignore
                 *step[0].args, ranking
             )
             )
@@ -129,7 +129,7 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
 figure.show()
 
 # %%
-epochs = 50
+epochs = 100
 
 figure = go.Figure()
 
@@ -155,7 +155,7 @@ experiment2 = run_experiment_v2(lambda: NevergradAlgorithmBase(
     ng.families.ParametrizedBO(
         utility_kind='ei',
         utility_kappa=2,
-        utility_xi=0,
+        utility_xi=1,
         gp_parameters={'alpha': 1}
     )
 ), epochs=epochs)

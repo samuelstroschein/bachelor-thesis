@@ -28,7 +28,7 @@ def objective_function_v1(x: Union[ng.p.Scalar, float],
 # take "very good point" and "very bad point" into consideration.
 # after each print ask the user to rank and rate the print. For example:
 # rank: 1, rating: 2 -> 0 = bad, 1 = neutral, 2 = good
-def objective_function_v2(x: Union[ng.p.Scalar, float],
+def rank_function_v1(x: Union[ng.p.Scalar, float],
                           y: Union[ng.p.Scalar, float],
                           z: Union[ng.p.Scalar, float],
                           ranking: List[List],
@@ -42,6 +42,18 @@ def objective_function_v2(x: Union[ng.p.Scalar, float],
     return ranking.index([x, y, z])
     # return ranking.index([x, y])
 
+def rank_function_v2(x: Union[ng.p.Scalar, float],
+                          y: Union[ng.p.Scalar, float],
+                          z: Union[ng.p.Scalar, float],
+                          ranking: List[List],
+                          ) -> float:
+    """
+    X,y,z are transformed into a list and then searched for in the
+    ranking list. The index position of the search is the returned value. 
+
+    E.g. [x,y,z], ranking = [[30,45,2], [x,y,z]] -> returns 1 
+    """
+    return ranking.index([x, y, z])
 
 def objective_function_v3(x: Union[ng.p.Scalar, float],
                           y: Union[ng.p.Scalar, float],
