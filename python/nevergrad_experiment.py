@@ -44,31 +44,36 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     is determined by the objective_v1 loss.
     """
     # two initial steps to start ranking
-    first_step = algorithm.step()
-    second_step = algorithm.step()
+    first_step = algorithm.optimizer.parametrization.spawn_child(
+        new_value=((215, 7, 50), {})
+    )
+    second_step = algorithm.optimizer.parametrization.spawn_child(
+        new_value=((185, 3, 30), {})
+    )
     # steps = tuple (step, loss from objective_function_v1)
     steps: List[Tuple] = [
-        (first_step, objective_function_v1(*first_step.args)),
-        (second_step, objective_function_v1(*first_step.args)),
+        (list(first_step.args), objective_function_v1(*first_step.args)),
+        (list(second_step.args), objective_function_v1(*second_step.args)),
     ]
-    # initial ranking
-    intial_ranking = [[*steps[0][0].args], [*steps[1][0].args]]  # type: ignore
     # tell the initial ranking
-    algorithm.tell_loss(steps[0][0], objective_function_v2(  # type: ignore
-        *steps[0][0].args, intial_ranking
+    # initial ranking
+    intial_ranking: Any = [steps[0][0], steps[1][0]]
+
+    algorithm.tell_loss(first_step, objective_function_v2(  # type: ignore
+        *steps[0][0], intial_ranking
     ))  # type: ignore
-    algorithm.tell_loss(steps[1][0], objective_function_v2(  # type: ignore
-        *steps[1][0].args, intial_ranking
+    algorithm.tell_loss(second_step, objective_function_v2(  # type: ignore
+        *steps[1][0], intial_ranking
     ))  # type: ignore
     for _ in range(epochs):  # type: ignore
         step = algorithm.step()
         loss = objective_function_v1(*step.args)
-        steps.append((step, loss))
+        steps.append((list(step.args), loss))
         ranking: Any = steps
         # sort by loss
         ranking.sort(key=lambda x: x[1])
         # remove loss value
-        ranking = list(map(lambda x: list(x[0].args), ranking))
+        ranking = list(map(lambda x: list(x[0]), ranking))
         algorithm.tell_loss(
             step, objective_function_v2(*step.args, ranking)  # type: ignore
         )
@@ -77,7 +82,7 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     # sort by loss
     final_ranking.sort(key=lambda x: x[1])
     # remove loss value
-    final_ranking = list(map(lambda x: list(x[0].args), final_ranking))
+    final_ranking = list(map(lambda x: list(x[0]), final_ranking))
 
     return Experiment(
         recommendation.args, objective_function_v2(  # type: ignore
@@ -120,7 +125,7 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
 figure.show()
 
 # %%
-epochs = 100
+epochs = 20
 
 figure = go.Figure()
 
@@ -128,7 +133,8 @@ experiment1 = run_experiment_v2(NevergradAlgorithmBase(
     ng.families.ParametrizedBO(
         utility_kind='ei',
         utility_kappa=1,
-        utility_xi=0
+        utility_xi=0,
+        gp_parameters={'alpha': 1}
     )
 ), epochs=epochs)
 
@@ -144,8 +150,9 @@ figure.add_trace(
 experiment2 = run_experiment_v2(NevergradAlgorithmBase(
     ng.families.ParametrizedBO(
         utility_kind='ei',
-        utility_kappa=2,
-        utility_xi=1
+        utility_kappa=1,
+        utility_xi=0,
+        gp_parameters={'alpha': 1}
     )
 ), epochs=epochs)
 
