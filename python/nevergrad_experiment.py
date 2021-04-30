@@ -36,7 +36,7 @@ def run_experiment_v1(algorithm, epochs: int) -> Experiment:
     return Experiment(recommendation.args, objective_function_v1(*recommendation.args), losses, steps)
 
 
-def run_experiment_v2(algorithm, epochs: int) -> Experiment:
+def run_experiment_v2(algorithm_init, epochs: int) -> Experiment:
     """
     Returns the recommendation, all losses and loss of recommendation.
 
@@ -44,6 +44,7 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     is determined by the objective_v1 loss.
     """
     # two initial steps to start ranking
+    algorithm = algorithm_init()
     first_step = algorithm.optimizer.parametrization.spawn_child(
         new_value=((215, 7, 50), algorithm.instrumentation.kwargs)
     )
@@ -75,13 +76,7 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
         # remove loss value
         ranking = list(map(lambda x: list(x[0].args), ranking))
         # recreate the algorithm in order to take new ranking into account
-        algorithm = NevergradAlgorithmBase(
-            ng.families.ParametrizedBO(
-                utility_kind='ei',
-                utility_kappa=1,
-                utility_xi=0,
-                gp_parameters={'alpha': 1}
-            ))
+        algorithm = algorithm_init()
         # tell new ranking
         for step in steps:
             algorithm.tell_loss(step[0], objective_function_v2(  # type: ignore
@@ -135,11 +130,11 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
 figure.show()
 
 # %%
-epochs = 20
+epochs = 30
 
 figure = go.Figure()
 
-experiment1 = run_experiment_v2(NevergradAlgorithmBase(
+experiment1 = run_experiment_v2(lambda: NevergradAlgorithmBase(
     ng.families.ParametrizedBO(
         utility_kind='ei',
         utility_kappa=1,
