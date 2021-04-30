@@ -130,7 +130,7 @@ figure.add_trace(go.Scatter(x=list(range(0, epochs)), y=bayesian2.losses,
 figure.show()
 
 # %%
-epochs = 30
+epochs = 100
 
 figure = go.Figure()
 
@@ -152,23 +152,54 @@ figure.add_trace(
     )
 )
 
-# experiment2 = run_experiment_v2(NevergradAlgorithmBase(
-#     ng.families.ParametrizedBO(
-#         utility_kind='ei',
-#         utility_kappa=1,
-#         utility_xi=0,
-#         gp_parameters={'alpha': 1}
-#     )
-# ), epochs=epochs)
+experiment2 = run_experiment_v2(lambda: NevergradAlgorithmBase(
+    ng.families.ParametrizedBO(
+        utility_kind='ei',
+        utility_kappa=2,
+        utility_xi=0,
+        gp_parameters={'alpha': 1}
+    )
+), epochs=epochs)
 
-# figure.add_trace(
-#     go.Scatter(
-#         x=list(range(0, epochs)),
-#         y=experiment2.losses,
-#         mode='lines+markers',
-#         name='experiment2'
-#     )
-# )
+figure.add_trace(
+    go.Scatter(
+        x=list(range(0, epochs)),
+        y=experiment2.losses,
+        mode='lines+markers',
+        name='experiment2'
+    )
+)
+
+experiment3 = run_experiment_v2(lambda: NevergradAlgorithmBase(
+    ng.families.ParametrizedBO(
+        utility_kind='ei',
+        utility_kappa=3,
+        utility_xi=1,
+        gp_parameters={'alpha': 1}
+    )
+), epochs=epochs)
+
+figure.add_trace(
+    go.Scatter(
+        x=list(range(0, epochs)),
+        y=experiment3.losses,
+        mode='lines+markers',
+        name='experiment3'
+    )
+)
+
+experiment4 = run_experiment_v2(lambda: NevergradAlgorithmBase(
+    ng.optimizers.RandomSearch
+), epochs=epochs)
+
+figure.add_trace(
+    go.Scatter(
+        x=list(range(0, epochs)),
+        y=experiment4.losses,
+        mode='lines+markers',
+        name='experiment4'
+    )
+)
 
 figure.show()
 
