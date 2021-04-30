@@ -5,7 +5,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from nevergrad_algorithm_base import NevergradAlgorithmBase
-from objective_functions import objective_function_v1, objective_function_v2
+from objective_functions import objective_function_v1, objective_function_v2, objective_function_v3
 
 
 class Experiment:
@@ -40,20 +40,20 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     """
     Returns the recommendation, all losses and loss of recommendation.
 
-    Utilizes ranking based objective function v2. The ranking position
+    Utilizes ranking based objective_function_v3. The ranking position
     is determined by the objective_v1 loss.
     """
     # two initial steps to start ranking
     first_step = algorithm.optimizer.parametrization.spawn_child(
-        new_value=((215, 7, 50), {})
+        new_value=((215, 7, 50), algorithm.instrumentation.kwargs)
     )
     second_step = algorithm.optimizer.parametrization.spawn_child(
-        new_value=((185, 3, 30), {})
+        new_value=((185, 3, 30), algorithm.instrumentation.kwargs)
     )
     # steps = tuple (step, loss from objective_function_v1)
     steps: List[Tuple] = [
-        (list(first_step.args), objective_function_v1(*first_step.args)),
-        (list(second_step.args), objective_function_v1(*second_step.args)),
+        (list(first_step.args), objective_function_v3(*first_step.args)),
+        (list(second_step.args), objective_function_v3(*second_step.args)),
     ]
     # tell the initial ranking
     # initial ranking
@@ -67,7 +67,7 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     ))  # type: ignore
     for _ in range(epochs):  # type: ignore
         step = algorithm.step()
-        loss = objective_function_v1(*step.args)
+        loss = objective_function_v3(*step.args)
         steps.append((list(step.args), loss))
         ranking: Any = steps.copy()
         # sort by loss
@@ -85,9 +85,8 @@ def run_experiment_v2(algorithm, epochs: int) -> Experiment:
     final_ranking = list(map(lambda x: list(x[0]), final_ranking))
 
     return Experiment(
-        recommendation.args, objective_function_v2(  # type: ignore
-            *recommendation.args, final_ranking
-        ),
+        recommendation.args,
+        0,  # loss is the 0 element in ranking so 0
         list(map(lambda x: x[1], steps)),
         list(map(lambda x: x[0], steps))
     )
@@ -147,23 +146,23 @@ figure.add_trace(
     )
 )
 
-experiment2 = run_experiment_v2(NevergradAlgorithmBase(
-    ng.families.ParametrizedBO(
-        utility_kind='ei',
-        utility_kappa=1,
-        utility_xi=0,
-        gp_parameters={'alpha': 1}
-    )
-), epochs=epochs)
+# experiment2 = run_experiment_v2(NevergradAlgorithmBase(
+#     ng.families.ParametrizedBO(
+#         utility_kind='ei',
+#         utility_kappa=1,
+#         utility_xi=0,
+#         gp_parameters={'alpha': 1}
+#     )
+# ), epochs=epochs)
 
-figure.add_trace(
-    go.Scatter(
-        x=list(range(0, epochs)),
-        y=experiment2.losses,
-        mode='lines+markers',
-        name='experiment2'
-    )
-)
+# figure.add_trace(
+#     go.Scatter(
+#         x=list(range(0, epochs)),
+#         y=experiment2.losses,
+#         mode='lines+markers',
+#         name='experiment2'
+#     )
+# )
 
 figure.show()
 

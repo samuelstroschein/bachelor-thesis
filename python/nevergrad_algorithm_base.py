@@ -17,14 +17,14 @@ class NevergradAlgorithmBase:
         E.g. the temperature range may lay between 180,221,10 which means
         each suggested temperature is either 180,190,200,210,220.
         """
-        instrumentation = instrumentation = ng.p.Instrumentation(
+        self.instrumentation = ng.p.Instrumentation(
             ng.p.TransitionChoice(temperature_range),
             ng.p.TransitionChoice(retraction_distance_range),
             ng.p.TransitionChoice(retraction_speed_range),
             # ng.p.TransitionChoice(prime_speed_range),
         )
         self.optimizer = optimizer(
-            parametrization=instrumentation,
+            parametrization=self.instrumentation,
             budget=5,
             num_workers=1
         )

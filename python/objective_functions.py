@@ -41,3 +41,20 @@ def objective_function_v2(x: Union[ng.p.Scalar, float],
     """
     return ranking.index([x, y, z])
     # return ranking.index([x, y])
+
+
+def objective_function_v3(x: Union[ng.p.Scalar, float],
+                          y: Union[ng.p.Scalar, float],
+                          z: Union[ng.p.Scalar, float],
+                          ) -> float:
+    """
+    Calculates the deviation of each individual the TRUTH_VALUES 
+    while adjusting each values weight based on the ranged of the parameters.
+
+    """
+    result = [
+        abs(TRUTH_VALUE[0] - x) * 2,
+        abs(TRUTH_VALUE[1] - y) * 10,
+        abs(TRUTH_VALUE[2] - z) * 1,
+    ]
+    return abs(np.sum(result))
