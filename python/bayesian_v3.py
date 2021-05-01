@@ -6,7 +6,7 @@ prime_speed = range(30,60)
 
 # %%
 from bayes_opt import UtilityFunction
-from typing import Union
+from typing import Tuple
 import nevergrad as ng
 import numpy as np
 from bayes_opt import BayesianOptimization
@@ -14,18 +14,34 @@ from objective_functions import objective_function_v3
 
 TRUTH_VALUE = np.array([
     210,  # print temperature
-    4,  # retraction distance
-    40   # reatraction speed
+    4,    # retraction distance
+    40    # reatraction speed
 ])
 
+
+def discrete_step_wrapper(
+    x: Tuple[float, range],
+    y: Tuple[float, range],
+    z: Tuple[float, range]
+):
+    """
+    Wraps the continous probs from the bayesian optimizer into 
+    discrete values binned to the specified step size.
+    """
+    return objective_function_v3(x[0], y[0], z[0], TRUTH_VALUE, minimize=False)
+
+
+x_range = range(180, 220, 5)
+y_range = range(2, 8, 1)
+z_range = range(30, 60, 10)
 
 pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
 
 # %% Automatic steps
 
 optimizer = BayesianOptimization(
-    f=lambda x, y, z: objective_function_v3(
-        x, y, z, TRUTH_VALUE, minimize=False
+    f=lambda x, y, z: discrete_step_wrapper(
+        (x, x_range), (y, y_range), (z, z_range),
     ),
     pbounds=pbounds,
     verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
@@ -46,7 +62,7 @@ optimizer.probe(
 
 optimizer.maximize(
     init_points=0,
-    n_iter=20,
+    n_iter=100,
     kappa=1.75
 )
 
