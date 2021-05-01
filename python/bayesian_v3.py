@@ -6,7 +6,7 @@ prime_speed = range(30,60)
 
 # %%
 from bayes_opt import UtilityFunction
-from typing import Tuple
+from typing import Tuple, Callable
 import nevergrad as ng
 import numpy as np
 from bayes_opt import BayesianOptimization
@@ -19,16 +19,43 @@ TRUTH_VALUE = np.array([
 ])
 
 
+def round_to_step(x: float, step: int) -> int:
+    return step * round(x/step)
+
+
 def discrete_step_wrapper(
     x: Tuple[float, range],
     y: Tuple[float, range],
     z: Tuple[float, range]
 ):
     """
-    Wraps the continous probs from the bayesian optimizer into 
+    Wraps the continous probs from the bayesian optimizer into
     discrete values binned to the specified step size.
     """
-    return objective_function_v3(x[0], y[0], z[0], TRUTH_VALUE, minimize=False)
+
+    nx = round_to_step(x[0], x[1].step)
+    ny = round_to_step(y[0], y[1].step)
+    nz = round_to_step(z[0], z[1].step)
+
+    return objective_function_v3(nx, ny, nz, TRUTH_VALUE, minimize=False)
+
+
+def mutate_previous_probe_then_do(optimizer: BayesianOptimization, then_do: Callable):
+    """
+    The optimizers previously probed point is overwritten with the result
+    of round_to_step. E.g. the optimizer probes 178.481284 which is
+    casted to 175. The probe will be overwritten from 178.481284
+    to 175.
+    """
+    if len(optimizer.res) > 0:
+        optimizer.res[-1]['params']['x'] = round_to_step(
+            optimizer.res[-1]['params']['x'], x_range.step)
+        optimizer.res[-1]['params']['y'] = round_to_step(
+            optimizer.res[-1]['params']['y'], y_range.step)
+        optimizer.res[-1]['params']['z'] = round_to_step(
+            optimizer.res[-1]['params']['z'], z_range.step)
+
+    return then_do
 
 
 x_range = range(180, 220, 5)
@@ -40,9 +67,11 @@ pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
 # %% Automatic steps
 
 optimizer = BayesianOptimization(
-    f=lambda x, y, z: discrete_step_wrapper(
-        (x, x_range), (y, y_range), (z, z_range),
-    ),
+    f=lambda x, y, z:
+        discrete_step_wrapper(
+            (x, x_range), (y, y_range), (z, z_range),
+
+        ),
     pbounds=pbounds,
     verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
     random_state=1,
@@ -62,7 +91,7 @@ optimizer.probe(
 
 optimizer.maximize(
     init_points=0,
-    n_iter=100,
+    n_iter=20,
     kappa=1.75
 )
 
