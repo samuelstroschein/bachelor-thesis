@@ -6,11 +6,69 @@ prime_speed = range(30,60)
 
 # %%
 from bayes_opt import UtilityFunction
-from typing import Tuple, Callable
+from bayes_opt.util import acq_max
+import warnings
+from typing import List, Tuple, Callable
 import nevergrad as ng
 import numpy as np
 from bayes_opt import BayesianOptimization
 from objective_functions import objective_function_v3
+
+
+class DiscreteBayesianOptimization(BayesianOptimization):
+    def __init__(self,
+                 f,
+                 pbounds,
+                 parameter_step_sizes: List[int],
+                 random_state=None,
+                 verbose=2,
+                 bounds_transformer=None,
+                 ):
+        """
+        Extends BayesianOptimization and overwrites the point to probe next
+        to be discrete.
+        """
+        self.parameter_step_sizes: List[int] = parameter_step_sizes
+        super().__init__(f, pbounds, random_state=random_state,
+                         verbose=verbose, bounds_transformer=bounds_transformer)
+
+    def _round_to_step(self, x: float, step: int) -> int:
+        """
+        Rounds a continuous value to the discrete value closest to the defined step size.
+        """
+        return step * round(x/step)
+
+    # @override
+    def suggest(self, utility_function):
+        """Most promissing point to probe next"""
+        if len(self._space) == 0:
+            return self._space.array_to_params(self._space.random_sample())
+
+        # Sklearn's GP throws a large number of warnings at times, but
+        # we don't really need to see them here.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self._gp.fit(self._space.params, self._space.target)
+
+        # Finding argmax of the acquisition function.
+        continuous_suggestion = acq_max(
+            ac=utility_function.utility,
+            gp=self._gp,
+            y_max=self._space.target.max(),
+            bounds=self._space.bounds,
+            random_state=self._random_state
+        )
+
+        # transform each value in suggestion into the
+        # discrete value closed to the defined step size
+        discrete_suggestion: np.ndarray = np.array([
+            self._round_to_step(
+                x, self.parameter_step_sizes[i]
+            ) for i, x in enumerate(continuous_suggestion)
+        ])
+
+        return self._space.array_to_params(discrete_suggestion)
+
 
 TRUTH_VALUE = np.array([
     210,  # print temperature
@@ -18,61 +76,16 @@ TRUTH_VALUE = np.array([
     40    # reatraction speed
 ])
 
-
-def round_to_step(x: float, step: int) -> int:
-    return step * round(x/step)
-
-
-def discrete_step_wrapper(
-    x: Tuple[float, range],
-    y: Tuple[float, range],
-    z: Tuple[float, range]
-):
-    """
-    Wraps the continous probs from the bayesian optimizer into
-    discrete values binned to the specified step size.
-    """
-
-    nx = round_to_step(x[0], x[1].step)
-    ny = round_to_step(y[0], y[1].step)
-    nz = round_to_step(z[0], z[1].step)
-
-    return objective_function_v3(nx, ny, nz, TRUTH_VALUE, minimize=False)
-
-
-def mutate_previous_probe_then_do(optimizer: BayesianOptimization, then_do: Callable):
-    """
-    The optimizers previously probed point is overwritten with the result
-    of round_to_step. E.g. the optimizer probes 178.481284 which is
-    casted to 175. The probe will be overwritten from 178.481284
-    to 175.
-    """
-    if len(optimizer.res) > 0:
-        optimizer.res[-1]['params']['x'] = round_to_step(
-            optimizer.res[-1]['params']['x'], x_range.step)
-        optimizer.res[-1]['params']['y'] = round_to_step(
-            optimizer.res[-1]['params']['y'], y_range.step)
-        optimizer.res[-1]['params']['z'] = round_to_step(
-            optimizer.res[-1]['params']['z'], z_range.step)
-
-    return then_do
-
-
-x_range = range(180, 220, 5)
-y_range = range(2, 8, 1)
-z_range = range(30, 60, 10)
-
 pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
 
 # %% Automatic steps
 
-optimizer = BayesianOptimization(
-    f=lambda x, y, z:
-        discrete_step_wrapper(
-            (x, x_range), (y, y_range), (z, z_range),
-
-        ),
+optimizer = DiscreteBayesianOptimization(
+    f=lambda x, y, z: objective_function_v3(
+        x, y, z, TRUTH_VALUE, minimize=False
+    ),
     pbounds=pbounds,
+    parameter_step_sizes=[5, 1, 10],
     verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
     random_state=1,
 )
