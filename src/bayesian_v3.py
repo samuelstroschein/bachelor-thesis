@@ -42,7 +42,13 @@ class DiscreteBayesianOptimization(BayesianOptimization):
     def suggest(self, utility_function):
         """Most promissing point to probe next"""
         if len(self._space) == 0:
-            return self._space.array_to_params(self._space.random_sample())
+            continuous_sample = self._space.random_sample()
+            discrete_sample = np.array([
+                DiscreteBayesianOptimization.round_to_step(
+                    x, self.parameter_step_sizes[i]
+                ) for i, x in enumerate(continuous_sample)
+            ])
+            return self._space.array_to_params(discrete_sample)
 
         # Sklearn's GP throws a large number of warnings at times, but
         # we don't really need to see them here.
