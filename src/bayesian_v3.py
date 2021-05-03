@@ -71,7 +71,6 @@ class DiscreteBayesianOptimization(BayesianOptimization):
 
 
 # # %% Automatic steps
-
 # TRUTH_VALUE = np.array([
 #     210,  # print temperature
 #     4,    # retraction distance
@@ -87,7 +86,6 @@ class DiscreteBayesianOptimization(BayesianOptimization):
 #     pbounds=pbounds,
 #     parameter_step_sizes=[5, 1, 10],
 #     verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
-#     random_state=1,
 # )
 
 # # set first initial point
