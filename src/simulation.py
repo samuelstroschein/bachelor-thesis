@@ -13,7 +13,6 @@ def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -
         parameter_step_sizes=[5, 1, 10],
         pbounds=bounds,
         verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
-        random_state=10,
     )
     for _ in range(epochs):
         next_point = optimizer.suggest(hyperparameter)
@@ -30,13 +29,17 @@ def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -
 
 
 # %%
+acquisition_functions = ['ucb', 'ei', 'poi']
+
 pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
+
 result = run_simulation(
     hyperparameter=UtilityFunction(
-        kind="ei", kappa=10, xi=0.1
+        kind="ucb", kappa=10, xi=1
     ),
     bounds=pbounds,
-    epochs=20
+    epochs=12
 )
 
+print(result.max)
 # %%
