@@ -105,23 +105,27 @@ optimizer.probe(
 optimizer.maximize(
     init_points=0,
     n_iter=20,
-    kappa=1.75
+    acq="ei",
+    kappa=10
 )
 
 print(optimizer.max)
 
 # %% Manual ask/tell steps
 
-optimizer = BayesianOptimization(
-    f=None,
+optimizer = DiscreteBayesianOptimization(
+    f=lambda x, y, z: objective_function_v3(
+        x, y, z, TRUTH_VALUE, minimize=False
+    ),
+    parameter_step_sizes=[5, 1, 10],
     pbounds=pbounds,
     verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
     random_state=10,
 )
 
-utility = UtilityFunction(kind="ucb", kappa=2, xi=0.0)
+utility = UtilityFunction(kind="ucb", kappa=10, xi=0.0)
 
-for i in range(4):
+for i in range(22):
     next_point = optimizer.suggest(utility)
     print(next_point)
     rank = objective_function_v3(
@@ -132,3 +136,5 @@ for i in range(4):
         minimize=False
     )
     optimizer.register(params=next_point, target=rank)
+
+# %%

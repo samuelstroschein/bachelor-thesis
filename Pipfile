@@ -9,6 +9,7 @@ nevergrad = "==0.4.3.post2"
 jupyter = "*"
 bayesian-optimization = "*"
 plotly = "==4.14.3"
+matplotlib = "*"
 
 [dev-packages]
 autopep8 = "*"
