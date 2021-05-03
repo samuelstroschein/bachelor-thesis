@@ -70,6 +70,8 @@ class DiscreteBayesianOptimization(BayesianOptimization):
         return self._space.array_to_params(discrete_suggestion)
 
 
+# # %% Automatic steps
+
 # TRUTH_VALUE = np.array([
 #     210,  # print temperature
 #     4,    # retraction distance
@@ -77,8 +79,6 @@ class DiscreteBayesianOptimization(BayesianOptimization):
 # ])
 
 # pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
-
-# # %% Automatic steps
 
 # optimizer = DiscreteBayesianOptimization(
 #     f=lambda x, y, z: objective_function_v3(
