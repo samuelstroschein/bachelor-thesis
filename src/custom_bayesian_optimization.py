@@ -73,3 +73,9 @@ class CustomBayesianOptimization(BayesianOptimization):
         ])
 
         return self._space.array_to_params(discrete_suggestion)
+
+    # @override
+    def register(self, params, target):
+        """Most promissing point to probe next"""
+        x = super().register(params=params, target=target)
+        print(x)
