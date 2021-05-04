@@ -1,12 +1,12 @@
 # %%
 from bayes_opt import UtilityFunction
 from objective_functions import objective_function_v3
-from discrete_bayesian_optimization import DiscreteBayesianOptimization
+from custom_bayesian_optimization import CustomBayesianOptimization
 
 
-def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -> DiscreteBayesianOptimization:
+def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -> CustomBayesianOptimization:
     random_truth_value = [220, 4, 40]
-    optimizer = DiscreteBayesianOptimization(
+    optimizer = CustomBayesianOptimization(
         f=lambda x, y, z: objective_function_v3(
             x, y, z, random_truth_value, minimize=False
         ),

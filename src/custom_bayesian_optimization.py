@@ -10,10 +10,9 @@ import warnings
 from typing import List
 import numpy as np
 from bayes_opt import BayesianOptimization
-from objective_functions import objective_function_v3
 
 
-class DiscreteBayesianOptimization(BayesianOptimization):
+class CustomBayesianOptimization(BayesianOptimization):
     def __init__(self,
                  f,
                  pbounds,
@@ -44,7 +43,7 @@ class DiscreteBayesianOptimization(BayesianOptimization):
         if len(self._space) == 0:
             continuous_sample = self._space.random_sample()
             discrete_sample = np.array([
-                DiscreteBayesianOptimization.round_to_step(
+                CustomBayesianOptimization.round_to_step(
                     x, self.parameter_step_sizes[i]
                 ) for i, x in enumerate(continuous_sample)
             ])
@@ -74,4 +73,3 @@ class DiscreteBayesianOptimization(BayesianOptimization):
         ])
 
         return self._space.array_to_params(discrete_suggestion)
-
