@@ -1,7 +1,7 @@
 # %%
 from bayes_opt import UtilityFunction
 from objective_functions import objective_function_v3
-from bayesian_v3 import DiscreteBayesianOptimization
+from discrete_bayesian_optimization import DiscreteBayesianOptimization
 
 
 def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -> DiscreteBayesianOptimization:
