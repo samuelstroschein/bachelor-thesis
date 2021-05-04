@@ -65,8 +65,7 @@ def objective_function_v3(x: Union[ng.p.Scalar, float],
                           ) -> float:
     """
     Calculates the deviation of each individual the TRUTH_VALUES 
-    while adjusting each values weight based on the ranged of the parameters.
-
+    while adjusting each values weight based on the range of the parameters.
     """
     result = [
         abs(truth_value[0] - x) * 2,
