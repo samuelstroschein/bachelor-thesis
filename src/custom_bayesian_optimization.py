@@ -67,7 +67,7 @@ class CustomBayesianOptimization(BayesianOptimization):
         # transform each value in suggestion into the
         # discrete value closed to the defined step size
         discrete_suggestion: np.ndarray = np.array([
-            DiscreteBayesianOptimization.round_to_step(
+            CustomBayesianOptimization.round_to_step(
                 x, self.parameter_step_sizes[i]
             ) for i, x in enumerate(continuous_suggestion)
         ])
