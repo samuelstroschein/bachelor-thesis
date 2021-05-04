@@ -74,8 +74,22 @@ class CustomBayesianOptimization(BayesianOptimization):
 
         return self._space.array_to_params(discrete_suggestion)
 
-    # @override
-    def register(self, params, target):
-        """Most promissing point to probe next"""
-        x = super().register(params=params, target=target)
-        print(x)
+    # @extension
+    def tell_ranking(self, ranking):
+        """
+        Reinitializes all probed parameters and their targets according to the
+        given ranking. 
+        """
+        # "forget" all probed points and their score (target)
+        self._space._params = np.array([]).reshape(0, self._space.dim)
+        self._space._target = np.array([])
+        for i, ls in enumerate(ranking):
+            self.register(self.array_to_parameters(ls), i)
+
+    # @extension
+    def parameters_to_array(self, parameter: dict) -> np.ndarray:
+        return self._space._as_array(parameter)
+
+    # @extension
+    def array_to_parameters(self, array) -> dict:
+        return self._space.array_to_params(array)

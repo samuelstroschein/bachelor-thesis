@@ -1,11 +1,11 @@
 # %%
-from typing import List
+from typing import Callable, List, Tuple
 import numpy as np
 from bayes_opt import UtilityFunction
 from custom_bayesian_optimization import CustomBayesianOptimization
 
 
-def simulate_objective_function(parameters: List[int], step_sizes: List[int], truth_value) -> float:
+def calculate_loss(parameters: np.ndarray, step_sizes: List[int], truth_value) -> float:
     """
     Calculates the deviation of each individual the TRUTH_VALUES 
     while adjusting each values weight based on the range of the parameters.
@@ -18,8 +18,28 @@ def simulate_objective_function(parameters: List[int], step_sizes: List[int], tr
     return -1 * abs(np.sum(result))
 
 
-def simulate_ranking(probed_points: List[dict]) -> int:
-    return 1
+def simulated_ranking(
+    probed_points: List[np.ndarray],
+    step_sizes: List[int],
+    truth_value: List[int],
+    calculate_loss: Callable
+) -> List[List[int]]:
+    """
+    Calculates the loss for each probed point and returns the probed points as a sorted list.
+    The index position of a point corresponds to the rank. The higher, the better. 
+    Example:
+        ranking[0] -> rank 0
+        ranking[1] -> rank 1
+        ...
+    """
+    losses: List[Tuple[np.ndarray, float]] = [
+        (point, calculate_loss(point, step_sizes, truth_value)) for point in probed_points
+    ]
+    # sort by loss
+    losses.sort(key=lambda x: x[1])
+    # remove loss value
+    ranking = list(map(lambda x: list(x[0]), losses))
+    return ranking
 
 
 def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -> CustomBayesianOptimization:
@@ -31,21 +51,32 @@ def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -
         pbounds=bounds,
         verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
     )
-    first_point = optimizer.suggest(hyperparameter)
-    second_point = optimizer.suggest(hyperparameter)
+    first_point = optimizer.parameters_to_array(
+        optimizer.suggest(hyperparameter)
+    )
+    second_point = optimizer.parameters_to_array(
+        optimizer.suggest(hyperparameter)
+    )
+    optimizer.tell_ranking(simulated_ranking(
+        [first_point, second_point],
+        step_sizes,
+        random_truth_value,
+        calculate_loss
+    ))
     for _ in range(epochs):
-        next_point = optimizer.suggest(hyperparameter)
+        next_point = optimizer.parameters_to_array(
+            optimizer.suggest(hyperparameter)
+        ).tolist()
+        already_probed_points = optimizer._space._params.tolist()
         print(next_point)
-        rank = simulate_objective_function(
-            parameters=[
-                next_point['x'],
-                next_point['y'],
-                next_point['z'],
-            ],
-            truth_value=random_truth_value,
-            step_sizes=step_sizes,
+        optimizer.tell_ranking(
+            simulated_ranking(
+                already_probed_points + [next_point],
+                step_sizes,
+                random_truth_value,
+                calculate_loss
+            )
         )
-        optimizer.register(params=next_point, target=rank)
     return optimizer
 
 
