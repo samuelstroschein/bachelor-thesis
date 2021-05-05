@@ -47,12 +47,12 @@ def simulated_ranking(
 
 def run_simulation(
     hyperparameter: UtilityFunction,
+    step_sizes: List[int],
     bounds: dict,
     epochs: int,
     truth_value: list,
     random_initial_points: bool,
 ) -> Tuple[CustomBayesianOptimization, List]:
-    step_sizes = [5, 1, 10]
     optimizer = CustomBayesianOptimization(
         f=None,
         parameter_step_sizes=step_sizes,
@@ -69,8 +69,9 @@ def run_simulation(
             optimizer.suggest(hyperparameter)
         )
     else:
-        first_point = np.array([180, 2, 30])
-        second_point = np.array([220, 8, 60])
+        #! hardcoded
+        first_point = np.array([180, 2, 90])
+        second_point = np.array([220, 8, 110])
     optimizer.tell_ranking(simulated_ranking(
         [first_point, second_point],
         step_sizes,
@@ -84,6 +85,7 @@ def run_simulation(
         next_point = optimizer.parameters_to_array(
             optimizer.suggest(hyperparameter)
         ).tolist()
+        print(next_point)
         order_of_probed_points.append(next_point)
         already_probed_points = optimizer._space._params.tolist()
         optimizer.tell_ranking(
@@ -101,6 +103,7 @@ def experiment(
     acquisition_function: str,
     bounds: dict,
     kappa: np.ndarray,
+    step_sizes: List[int],
     xi: np.ndarray,
     trials=100
 ) -> List[dict]:
@@ -116,8 +119,10 @@ def experiment(
                         random_truth_value: List[int] = []
                         for lower, upper in bounds_as_list:
                             random_truth_value.append(
-                                random.randint(lower, upper))
+                                random.randint(lower, upper)
+                            )
                         simulation, order_of_probed_points = run_simulation(
+                            step_sizes=step_sizes,
                             random_initial_points=random_initial_points,
                             hyperparameter=UtilityFunction(
                                 kind=acquisition_function,
@@ -162,16 +167,20 @@ def experiment(
 # %%
 acquisition_functions = ['ucb', 'ei', 'poi']
 
+# set initial points in run simulation if changing pbounds
 pbounds = {
-    'print_temperature': (180, 220),
-    'retraction_distance': (2, 8),
-    'flow_rate': (90, 110)
+    'x': (180, 220),
+    'y': (2, 8),
+    'z': (90, 110)
 }
+
+step_sizes = [5, 1, 10]
 
 results: List[dict] = []
 
 for acquisition_function in acquisition_functions:
     results = results + experiment(
+        step_sizes=step_sizes,
         acquisition_function=acquisition_function,
         bounds=pbounds,
         kappa=np.arange(0, 10, 1),

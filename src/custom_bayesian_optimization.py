@@ -94,7 +94,7 @@ class CustomBayesianOptimization(BayesianOptimization):
                 return self._space.array_to_params(discrete_suggestion)
             except:
                 number_retries += 1
-        raise Exception("Even with retries, no unique probe could be sampled.")
+        raise KeyError("Even with retries, no unique probe could be sampled.")
 
     # @extension
     def tell_ranking(self, ranking):
