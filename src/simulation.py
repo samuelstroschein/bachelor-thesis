@@ -113,6 +113,7 @@ def experiment(
             for x in xi:
                 epochs_until_solution = []  # type:ignore
                 losses_of_solutions = []  # type:ignore
+                has_error = False
                 for _ in range(trials):
                     try:
                         bounds_as_list = list(bounds.values())
@@ -151,16 +152,18 @@ def experiment(
                         print(
                             "Warning: a sampled point not not unique; trial terminated."
                         )
-                        pass
-                result.append({
-                    "acquisition_function": acquisition_function,
-                    "random_initial_points": random_initial_points,
-                    "kappa": k,
-                    "xi": x,
-                    "median_best_solution": statistics.median(epochs_until_solution),
-                    "mean_loss": statistics.mean(losses_of_solutions)
-                })
-                print(result[-1])
+                        has_error = True
+                        break
+                if not has_error:
+                    result.append({
+                        "acquisition_function": acquisition_function,
+                        "random_initial_points": random_initial_points,
+                        "kappa": k,
+                        "xi": x,
+                        "median_best_solution": statistics.median(epochs_until_solution),
+                        "mean_loss": statistics.mean(losses_of_solutions)
+                    })
+                    print(result[-1])
     return result
 
 
