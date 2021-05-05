@@ -43,20 +43,16 @@ def simulated_ranking(
 
 
 def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -> CustomBayesianOptimization:
-    random_truth_value = [220, 4, 40]
-    step_sizes = [1, 1, 1]
+    random_truth_value = [200, 4, 40]
+    step_sizes = [5, 1, 10]
     optimizer = CustomBayesianOptimization(
         f=None,
         parameter_step_sizes=step_sizes,
         pbounds=bounds,
         verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
     )
-    first_point = optimizer.parameters_to_array(
-        optimizer.suggest(hyperparameter)
-    )
-    second_point = optimizer.parameters_to_array(
-        optimizer.suggest(hyperparameter)
-    )
+    first_point = np.array([180, 2, 30])
+    second_point = np.array([220, 8, 60])
     optimizer.tell_ranking(simulated_ranking(
         [first_point, second_point],
         step_sizes,
@@ -87,10 +83,12 @@ pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
 
 result = run_simulation(
     hyperparameter=UtilityFunction(
-        kind="ucb", kappa=5, xi=1
+        kind="ei",
+        kappa=10,
+        xi=0.1
     ),
     bounds=pbounds,
-    epochs=30
+    epochs=10
 )
 
 print(result.max)

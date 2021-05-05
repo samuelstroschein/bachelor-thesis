@@ -10,6 +10,7 @@ import warnings
 from typing import List
 import numpy as np
 from bayes_opt import BayesianOptimization
+import copy
 
 
 class CustomBayesianOptimization(BayesianOptimization):
@@ -62,26 +63,42 @@ class CustomBayesianOptimization(BayesianOptimization):
             warnings.simplefilter("ignore")
             self._gp.fit(self._space.params, self._space.target)
 
-        # Finding argmax of the acquisition function.
-        continuous_suggestion = acq_max(
-            ac=utility_function.utility,
-            gp=self._gp,
-            y_max=self._space.target.max(),
-            bounds=self._space.bounds,
-            random_state=self._random_state
-        )
+        number_retries = 0
+        max_number_retries = 5
+        # original utlity function should not be mutated. thus, deepcopy.
+        hyperparameter = copy.deepcopy(utility_function)
+        while (number_retries < max_number_retries):
+            if number_retries is not 0:
+                if hyperparameter.kappa <= 1:
+                    hyperparameter.kappa += 1
+                else:
+                    hyperparameter.kappa = hyperparameter.kappa ** 2
+            try:
+                # Finding argmax of the acquisition function.
+                continuous_suggestion = acq_max(
+                    ac=utility_function.utility,
+                    gp=self._gp,
+                    y_max=self._space.target.max(),
+                    bounds=self._space.bounds,
+                    random_state=self._random_state
+                )
 
-        # transform each value in suggestion into the
-        # discrete value closed to the defined step size
-        discrete_suggestion: np.ndarray = np.array([
-            CustomBayesianOptimization.round_to_step(
-                x, self.parameter_step_sizes[i]
-            ) for i, x in enumerate(continuous_suggestion)
-        ])
-
-        return self._space.array_to_params(discrete_suggestion)
+                # transform each value in suggestion into the
+                # discrete value closed to the defined step size
+                discrete_suggestion: np.ndarray = np.array([
+                    CustomBayesianOptimization.round_to_step(
+                        x, self.parameter_step_sizes[i]
+                    ) for i, x in enumerate(continuous_suggestion)
+                ])
+                if discrete_suggestion in self._space:
+                    raise Exception("Already probed suggestion.")
+                return self._space.array_to_params(discrete_suggestion)
+            except:
+                number_retries += 1
+        raise Exception("Even with retries, no unique probe could be sampled.")
 
     # @extension
+
     def tell_ranking(self, ranking):
         """
         Reinitializes the optimizers and registers  according to the
