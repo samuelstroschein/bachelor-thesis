@@ -85,10 +85,10 @@ result = run_simulation(
     hyperparameter=UtilityFunction(
         kind="ei",
         kappa=10,
-        xi=0.1
+        xi=0.5
     ),
     bounds=pbounds,
-    epochs=10
+    epochs=20
 )
 
 print(result.max)

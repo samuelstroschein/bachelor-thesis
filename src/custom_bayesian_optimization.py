@@ -10,7 +10,6 @@ import warnings
 from typing import List
 import numpy as np
 from bayes_opt import BayesianOptimization
-import copy
 
 
 class CustomBayesianOptimization(BayesianOptimization):
@@ -26,14 +25,14 @@ class CustomBayesianOptimization(BayesianOptimization):
         Extends BayesianOptimization and overwrites the point to probe next
         to be discrete.
         """
+        self.parameter_step_sizes: List[int] = parameter_step_sizes
         self.init_parameters = {
             "f": f,
             "pbounds": pbounds.copy(),
-            "parameter_step_sizes": parameter_step_sizes.copy(),
+            "parameter_step_sizes": self.parameter_step_sizes,
             "verbose": verbose,
             "bounds_transformer": bounds_transformer,
         }
-        self.parameter_step_sizes: List[int] = parameter_step_sizes
         super().__init__(f, pbounds, random_state=random_state,
                          verbose=verbose, bounds_transformer=bounds_transformer)
 
@@ -64,15 +63,15 @@ class CustomBayesianOptimization(BayesianOptimization):
             self._gp.fit(self._space.params, self._space.target)
 
         number_retries = 0
-        max_number_retries = 5
-        # original utlity function should not be mutated. thus, deepcopy.
-        hyperparameter = copy.deepcopy(utility_function)
-        while (number_retries < max_number_retries):
-            if number_retries is not 0:
-                if hyperparameter.kappa <= 1:
-                    hyperparameter.kappa += 1
-                else:
-                    hyperparameter.kappa = hyperparameter.kappa ** 2
+        while (True):
+            if number_retries > 0:
+                index = self.parameter_step_sizes.index(
+                    max(self.parameter_step_sizes)
+                )
+                if self.parameter_step_sizes[index] is 1:
+                    # all step sizes are 1 already. end optimization
+                    break
+                self.parameter_step_sizes[index] -= 1
             try:
                 # Finding argmax of the acquisition function.
                 continuous_suggestion = acq_max(
@@ -98,7 +97,6 @@ class CustomBayesianOptimization(BayesianOptimization):
         raise Exception("Even with retries, no unique probe could be sampled.")
 
     # @extension
-
     def tell_ranking(self, ranking):
         """
         Reinitializes the optimizers and registers  according to the
