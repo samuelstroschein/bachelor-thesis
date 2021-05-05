@@ -25,6 +25,13 @@ class CustomBayesianOptimization(BayesianOptimization):
         Extends BayesianOptimization and overwrites the point to probe next
         to be discrete.
         """
+        self.init_parameters = {
+            "f": f,
+            "pbounds": pbounds.copy(),
+            "parameter_step_sizes": parameter_step_sizes.copy(),
+            "verbose": verbose,
+            "bounds_transformer": bounds_transformer,
+        }
         self.parameter_step_sizes: List[int] = parameter_step_sizes
         super().__init__(f, pbounds, random_state=random_state,
                          verbose=verbose, bounds_transformer=bounds_transformer)
@@ -77,12 +84,13 @@ class CustomBayesianOptimization(BayesianOptimization):
     # @extension
     def tell_ranking(self, ranking):
         """
-        Reinitializes all probed parameters and their targets according to the
+        Reinitializes the optimizers and registers  according to the
         given ranking. 
         """
         # "forget" all probed points and their score (target)
-        self._space._params = np.array([]).reshape(0, self._space.dim)
-        self._space._target = np.array([])
+        # self._space._params = np.array([]).reshape(0, self._space.dim)
+        # self._space._target = np.array([])
+        self.__init__(**self.init_parameters)
         for i, ls in enumerate(ranking):
             self.register(self.array_to_parameters(ls), i)
 
@@ -93,3 +101,5 @@ class CustomBayesianOptimization(BayesianOptimization):
     # @extension
     def array_to_parameters(self, array) -> dict:
         return self._space.array_to_params(array)
+
+# %%

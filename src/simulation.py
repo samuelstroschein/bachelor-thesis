@@ -44,7 +44,7 @@ def simulated_ranking(
 
 def run_simulation(hyperparameter: UtilityFunction, bounds: dict, epochs: int) -> CustomBayesianOptimization:
     random_truth_value = [220, 4, 40]
-    step_sizes = [5, 1, 10]
+    step_sizes = [1, 1, 1]
     optimizer = CustomBayesianOptimization(
         f=None,
         parameter_step_sizes=step_sizes,
@@ -87,10 +87,10 @@ pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
 
 result = run_simulation(
     hyperparameter=UtilityFunction(
-        kind="ucb", kappa=20, xi=1
+        kind="ucb", kappa=5, xi=1
     ),
     bounds=pbounds,
-    epochs=12
+    epochs=30
 )
 
 print(result.max)
