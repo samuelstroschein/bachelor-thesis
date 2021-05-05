@@ -50,6 +50,7 @@ def run_simulation(
     bounds: dict,
     epochs: int,
     truth_value: list,
+    random_initial_points: bool,
 ) -> Tuple[CustomBayesianOptimization, List]:
     step_sizes = [5, 1, 10]
     optimizer = CustomBayesianOptimization(
@@ -58,8 +59,18 @@ def run_simulation(
         pbounds=bounds,
         verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
     )
-    first_point = np.array([180, 2, 30])
-    second_point = np.array([220, 8, 60])
+    first_point = None
+    second_point = None
+    if random_initial_points:
+        first_point = optimizer.parameters_to_array(
+            optimizer.suggest(hyperparameter)
+        )
+        second_point = optimizer.parameters_to_array(
+            optimizer.suggest(hyperparameter)
+        )
+    else:
+        first_point = np.array([180, 2, 30])
+        second_point = np.array([220, 8, 60])
     optimizer.tell_ranking(simulated_ranking(
         [first_point, second_point],
         step_sizes,
@@ -75,7 +86,6 @@ def run_simulation(
         ).tolist()
         order_of_probed_points.append(next_point)
         already_probed_points = optimizer._space._params.tolist()
-        print(next_point)
         optimizer.tell_ranking(
             simulated_ranking(
                 already_probed_points + [next_point],
@@ -92,77 +102,83 @@ def experiment(
     bounds: dict,
     kappa: np.ndarray,
     xi: np.ndarray,
-    trials=5
+    trials=100
 ) -> List[dict]:
     result: List[dict] = []
-    for k in kappa:
-        for x in xi:
-            epochs_until_solution = []  # type:ignore
-            losses_of_solutions = []  # type:ignore
-            for _ in range(trials):
-                bounds_as_list = list(bounds.values())
-                random_truth_value: List[int] = []
-                for lower, upper in bounds_as_list:
-                    random_truth_value.append(random.randint(lower, upper))
-                simulation, order_of_probed_points = run_simulation(
-                    hyperparameter=UtilityFunction(
-                        kind=acquisition_function,
-                        kappa=k,
-                        xi=x,
-                    ),
-                    truth_value=random_truth_value,
-                    bounds=bounds,
-                    epochs=10
-                )
-                best_point = simulation.parameters_to_array(
-                    simulation.max['params']
-                ).astype(int).tolist()
-                losses_of_solutions.append(
-                    calculate_loss(
-                        parameters=best_point,
-                        step_sizes=simulation.parameter_step_sizes,
-                        truth_value=random_truth_value,
-                    )
-                )
-                epochs_until_solution.append(
-                    order_of_probed_points.index(best_point)
-                )
-            result.append({
-                "acquisition_function": acquisition_function,
-                "kappa": k,
-                "xi": x,
-                "median_best_solution": statistics.median(epochs_until_solution),
-                "mean_loss": statistics.mean(losses_of_solutions)
-            })
-            print(result[-1])
+    for random_initial_points in [False, True]:
+        for k in kappa:
+            for x in xi:
+                epochs_until_solution = []  # type:ignore
+                losses_of_solutions = []  # type:ignore
+                for _ in range(trials):
+                    try:
+                        bounds_as_list = list(bounds.values())
+                        random_truth_value: List[int] = []
+                        for lower, upper in bounds_as_list:
+                            random_truth_value.append(
+                                random.randint(lower, upper))
+                        simulation, order_of_probed_points = run_simulation(
+                            random_initial_points=random_initial_points,
+                            hyperparameter=UtilityFunction(
+                                kind=acquisition_function,
+                                kappa=k,
+                                xi=x,
+                            ),
+                            truth_value=random_truth_value,
+                            bounds=bounds,
+                            epochs=10
+                        )
+                        best_point = simulation.parameters_to_array(
+                            simulation.max['params']
+                        ).astype(int).tolist()
+                        losses_of_solutions.append(
+                            calculate_loss(
+                                parameters=best_point,
+                                step_sizes=simulation.parameter_step_sizes,
+                                truth_value=random_truth_value,
+                            )
+                        )
+                        epochs_until_solution.append(
+                            order_of_probed_points.index(best_point)
+                        )
+                    except KeyError:
+                        # a sampled point is not unique
+                        print(
+                            "Warning: a sampled point not not unique; trial terminated."
+                        )
+                        pass
+                result.append({
+                    "acquisition_function": acquisition_function,
+                    "random_initial_points": random_initial_points,
+                    "kappa": k,
+                    "xi": x,
+                    "median_best_solution": statistics.median(epochs_until_solution),
+                    "mean_loss": statistics.mean(losses_of_solutions)
+                })
+                print(result[-1])
     return result
 
 
 # %%
 acquisition_functions = ['ucb', 'ei', 'poi']
 
-pbounds = {'x': (180, 220), 'y': (2, 8), 'z': (30, 60)}
+pbounds = {
+    'print_temperature': (180, 220),
+    'retraction_distance': (2, 8),
+    'flow_rate': (90, 110)
+}
 
-results = pd.DataFrame(
-    columns=[
-        'acquisition_function',
-        'kappa',
-        'xi',
-        'median_best_solution',
-        'mean_loss'
-    ]
-)
+results: List[dict] = []
 
-results = []
-
-results = results + experiment(
-    acquisition_function='ei',
-    bounds=pbounds,
-    kappa=np.arange(0, 10, 4),
-    xi=np.arange(0, 1, 0.4)
-)
+for acquisition_function in acquisition_functions:
+    results = results + experiment(
+        acquisition_function=acquisition_function,
+        bounds=pbounds,
+        kappa=np.arange(0, 10, 1),
+        xi=np.arange(0, 1, 0.1)
+    )
 
 df = pd.DataFrame(results)
 
-print(df)
+df
 # %%
