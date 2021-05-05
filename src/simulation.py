@@ -5,6 +5,7 @@ from bayes_opt import UtilityFunction
 from custom_bayesian_optimization import CustomBayesianOptimization
 import pandas as pd
 import statistics
+import random
 
 
 def calculate_loss(parameters: np.ndarray, step_sizes: List[int], truth_value) -> float:
@@ -99,7 +100,10 @@ def experiment(
             epochs_until_solution = []  # type:ignore
             losses_of_solutions = []  # type:ignore
             for _ in range(trials):
-                random_truth_value = [200, 4, 40]
+                bounds_as_list = list(bounds.values())
+                random_truth_value: List[int] = []
+                for lower, upper in bounds_as_list:
+                    random_truth_value.append(random.randint(lower, upper))
                 simulation, order_of_probed_points = run_simulation(
                     hyperparameter=UtilityFunction(
                         kind=acquisition_function,
