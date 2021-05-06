@@ -96,7 +96,7 @@ def experiment(
     kappa: np.ndarray,
     step_sizes: List[int],
     xi: np.ndarray,
-    trials=10
+    num_runs=10
 ) -> List[dict]:
     result: List[dict] = []
     for k in kappa:
@@ -104,7 +104,7 @@ def experiment(
             epochs_until_solution = []  # type:ignore
             losses_of_solutions = []  # type:ignore
             has_error = False
-            for _ in range(trials):
+            for _ in range(num_runs):
                 try:
                     bounds_as_list = list(bounds.values())
                     random_truth_value: List[int] = []
@@ -179,7 +179,7 @@ for acquisition_function in acquisition_functions:
         step_sizes=step_sizes,
         acquisition_function=acquisition_function,
         bounds=pbounds,
-        trials=10,
+        num_runs=100,
         kappa=np.arange(0, 10, 4),
         xi=np.arange(0, 1, 0.4)
     )
