@@ -8,17 +8,15 @@ import statistics
 import random
 
 
-def calculate_loss(parameters: np.ndarray, step_sizes: List[int], truth_value) -> float:
+def calculate_loss(parameters: np.ndarray, step_sizes: List[int], truth_value):
     """
     Calculates the deviation of each individual the TRUTH_VALUES
     while adjusting each values weight based on the range of the parameters.
     """
-    result = [
-        abs(truth_value[0] - parameters[0]) * step_sizes[0],
-        abs(truth_value[1] - parameters[1]) * step_sizes[1],
-        abs(truth_value[2] - parameters[2]) * step_sizes[2],
-    ]
-    return -1 * abs(np.sum(result))
+    result = []
+    for i in range(len(parameters)):
+        result.append(abs(truth_value[i] - parameters[i]) / step_sizes[i])
+    return -1 * np.sum(result)
 
 
 def simulated_ranking(
@@ -167,7 +165,7 @@ step_sizes = [5, 1, 2]
 
 # %%
 """
-First Experiment:
+First Simulation:
 
 Determining if randomizing the initial samples improves convergence. 
 """
@@ -193,7 +191,7 @@ Randomized is better.
 """
 # %%
 """
-Second Experiment:
+Second Simulation:
 
 Determining which acquisition function and range of kappa,xi should further be investigated. 
 """
@@ -212,9 +210,61 @@ for acquisition_function in acquisition_functions:
 
 df = pd.DataFrame(results)
 
-df.to_csv('hyperparameter_tuning_second_experiment.csv')
+df.to_csv('hyperparameter_tuning_second_simulation.csv')
+
+acq = df.groupby("acquisition_function")[["mean_loss"]].mean().round(2)
+print(acq)
+df_ei = df.loc[df['acquisition_function'] == "ei"]
+kappa = df_ei.groupby("kappa")[["mean_loss"]].mean().round(2)
+xi = df_ei.groupby("xi")[["mean_loss"]].mean().round(2)
+
+"""
+Result:
+Expected Improvement acq function is best
+Bounds of kappa and xi have been adjusted. See next simulation.
+"""
+# %%
+"""
+Third Simulation:
+
+Determining optimal kappa and xi parameters for ei acquisition function.
+"""
+acquisition_functions = ['ei']
+results = []
+
+for acquisition_function in acquisition_functions:
+    results = results + experiment(
+        step_sizes=step_sizes,
+        acquisition_function=acquisition_function,
+        bounds=pbounds,
+        num_runs=100,
+        kappa=np.arange(1, 6, 1),
+        xi=np.arange(0.5, 1.5, 0.1)
+    )
+
+df = pd.DataFrame(results)
+
+df.to_csv('hyperparameter_tuning_third_simulation.csv')
+
 """
 Result:
 
 """
+
+# %%
+acquisition_functions = ['ei']
+results = []
+
+for acquisition_function in acquisition_functions:
+    results = results + experiment(
+        step_sizes=step_sizes,
+        acquisition_function=acquisition_function,
+        bounds=pbounds,
+        num_runs=100,
+        kappa=np.arange(5, 6, 1),
+        xi=np.arange(1, 1.1, 0.1)
+    )
+
+df = pd.DataFrame(results)
+
 # %%
