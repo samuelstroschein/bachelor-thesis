@@ -165,9 +165,9 @@ pbounds = {
 
 step_sizes = [5, 1, 2]
 
-#%%
+# %%
 """
-First Test:
+First Experiment:
 
 Determining if randomizing the initial samples improves convergence. 
 """
@@ -179,7 +179,7 @@ for acquisition_function in acquisition_functions:
         step_sizes=step_sizes,
         acquisition_function=acquisition_function,
         bounds=pbounds,
-        num_runs=100,
+        num_runs=10,
         kappa=np.arange(0, 10, 4),
         xi=np.arange(0, 1, 0.4)
     )
@@ -190,5 +190,31 @@ df.groupby("random_initial_points").mean()
 """
 Result:
 Randomized is better.
+"""
+# %%
+"""
+Second Experiment:
+
+Determining which acquisition function and range of kappa,xi should further be investigated. 
+"""
+acquisition_functions = ['ucb', 'ei', 'poi']
+results = []
+
+for acquisition_function in acquisition_functions:
+    results = results + experiment(
+        step_sizes=step_sizes,
+        acquisition_function=acquisition_function,
+        bounds=pbounds,
+        num_runs=10,
+        kappa=np.arange(0, 10, 1),
+        xi=np.arange(0, 1, 0.1)
+    )
+
+df = pd.DataFrame(results)
+
+df.to_csv('hyperparameter_tuning_second_experiment.csv')
+"""
+Result:
+
 """
 # %%
