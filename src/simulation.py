@@ -85,7 +85,6 @@ def run_simulation(
         next_point = optimizer.parameters_to_array(
             optimizer.suggest(hyperparameter)
         ).tolist()
-        print(next_point)
         order_of_probed_points.append(next_point)
         already_probed_points = optimizer._space._params.tolist()
         optimizer.tell_ranking(
@@ -177,7 +176,7 @@ pbounds = {
     'z': (90, 110)
 }
 
-step_sizes = [5, 1, 10]
+step_sizes = [5, 1, 2]
 
 results: List[dict] = []
 

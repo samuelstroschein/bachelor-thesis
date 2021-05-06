@@ -62,39 +62,44 @@ class CustomBayesianOptimization(BayesianOptimization):
             warnings.simplefilter("ignore")
             self._gp.fit(self._space.params, self._space.target)
 
-        number_retries = 0
-        while (True):
-            if number_retries > 0:
-                index = self.parameter_step_sizes.index(
-                    max(self.parameter_step_sizes)
-                )
-                if self.parameter_step_sizes[index] is 1:
-                    # all step sizes are 1 already. end optimization
-                    break
-                self.parameter_step_sizes[index] -= 1
-            try:
-                # Finding argmax of the acquisition function.
-                continuous_suggestion = acq_max(
-                    ac=utility_function.utility,
-                    gp=self._gp,
-                    y_max=self._space.target.max(),
-                    bounds=self._space.bounds,
-                    random_state=self._random_state
-                )
+        try:
+            # Finding argmax of the acquisition function.
+            continuous_suggestion = acq_max(
+                ac=utility_function.utility,
+                gp=self._gp,
+                y_max=self._space.target.max(),
+                bounds=self._space.bounds,
+                random_state=self._random_state
+            )
 
-                # transform each value in suggestion into the
-                # discrete value closed to the defined step size
-                discrete_suggestion: np.ndarray = np.array([
-                    CustomBayesianOptimization.round_to_step(
-                        x, self.parameter_step_sizes[i]
-                    ) for i, x in enumerate(continuous_suggestion)
-                ])
-                if discrete_suggestion in self._space:
-                    raise Exception("Already probed suggestion.")
-                return self._space.array_to_params(discrete_suggestion)
-            except:
-                number_retries += 1
-        raise KeyError("Even with retries, no unique probe could be sampled.")
+            # transform each value in suggestion into the
+            # discrete value closed to the defined step size
+            discrete_suggestion: np.ndarray = np.array([
+                CustomBayesianOptimization.round_to_step(
+                    x, self.parameter_step_sizes[i]
+                ) for i, x in enumerate(continuous_suggestion)
+            ])
+            if discrete_suggestion in self._space:
+                raise KeyError("Already probed suggestion.")
+            return self._space.array_to_params(discrete_suggestion)
+        except:
+            number_retries = 0
+            max_number_retries = 10
+            while (number_retries < max_number_retries):
+                try:
+                    continuous_sample = self._space.random_sample()
+                    discrete_sample = np.array([
+                        CustomBayesianOptimization.round_to_step(
+                            x, self.parameter_step_sizes[i]
+                        ) for i, x in enumerate(continuous_sample)
+                    ])
+                    if discrete_sample in self._space:
+                        raise KeyError("Already probed suggestion.")
+                    return self._space.array_to_params(discrete_sample)
+                except:
+                    number_retries += 1
+            raise KeyError(
+                "Even with retries no unique sample could be probed.")
 
     # @extension
     def tell_ranking(self, ranking):
