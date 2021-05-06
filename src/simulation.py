@@ -131,7 +131,7 @@ def experiment(
                             ),
                             truth_value=random_truth_value,
                             bounds=bounds,
-                            epochs=20
+                            epochs=18
                         )
                         best_point = simulation.parameters_to_array(
                             simulation.max['params']
