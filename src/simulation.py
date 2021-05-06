@@ -183,6 +183,8 @@ for acquisition_function in acquisition_functions:
     )
 
 df = pd.DataFrame(results)
+df.to_csv('hyperparameter_tuning_first_simulation.csv')
+
 
 df.groupby("random_initial_points").mean()
 """
@@ -208,13 +210,13 @@ for acquisition_function in acquisition_functions:
         xi=np.arange(0, 1, 0.1)
     )
 
-df = pd.DataFrame(results)
+df2 = pd.DataFrame(results)
 
-df.to_csv('hyperparameter_tuning_second_simulation.csv')
+df2.to_csv('hyperparameter_tuning_second_simulation.csv')
 
 acq = df.groupby("acquisition_function")[["mean_loss"]].mean().round(2)
 print(acq)
-df_ei = df.loc[df['acquisition_function'] == "ei"]
+df_ei = df2.loc[df['acquisition_function'] == "ei"]
 kappa = df_ei.groupby("kappa")[["mean_loss"]].mean().round(2)
 xi = df_ei.groupby("xi")[["mean_loss"]].mean().round(2)
 
@@ -242,29 +244,13 @@ for acquisition_function in acquisition_functions:
         xi=np.arange(0.5, 1.5, 0.1)
     )
 
-df = pd.DataFrame(results)
+df3 = pd.DataFrame(results)
 
-df.to_csv('hyperparameter_tuning_third_simulation.csv')
+df3.to_csv('hyperparameter_tuning_third_simulation.csv')
 
 """
 Result:
 
 """
-
-# %%
-acquisition_functions = ['ei']
-results = []
-
-for acquisition_function in acquisition_functions:
-    results = results + experiment(
-        step_sizes=step_sizes,
-        acquisition_function=acquisition_function,
-        bounds=pbounds,
-        num_runs=100,
-        kappa=np.arange(5, 6, 1),
-        xi=np.arange(1, 1.1, 0.1)
-    )
-
-df = pd.DataFrame(results)
 
 # %%

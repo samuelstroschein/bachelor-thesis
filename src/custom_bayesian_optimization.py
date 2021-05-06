@@ -84,7 +84,7 @@ class CustomBayesianOptimization(BayesianOptimization):
             return self._space.array_to_params(discrete_suggestion)
         except:
             number_retries = 0
-            max_number_retries = 10
+            max_number_retries = 20
             while (number_retries < max_number_retries):
                 try:
                     continuous_sample = self._space.random_sample()
