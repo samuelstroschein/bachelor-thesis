@@ -214,9 +214,8 @@ df2 = pd.DataFrame(results)
 
 df2.to_csv('hyperparameter_tuning_second_simulation.csv')
 
-acq = df.groupby("acquisition_function")[["mean_loss"]].mean().round(2)
-print(acq)
-df_ei = df2.loc[df['acquisition_function'] == "ei"]
+acq = df2.groupby("acquisition_function")[["mean_loss"]].mean().round(2)
+df_ei = df2.loc[df2['acquisition_function'] == "ei"]
 kappa = df_ei.groupby("kappa")[["mean_loss"]].mean().round(2)
 xi = df_ei.groupby("xi")[["mean_loss"]].mean().round(2)
 
