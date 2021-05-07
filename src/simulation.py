@@ -1,4 +1,7 @@
 # %%
+from mpl_toolkits.mplot3d.axes3d import get_test_data
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 from typing import Callable, List, Tuple
 import numpy as np
 from bayes_opt import UtilityFunction
@@ -251,5 +254,97 @@ df3.to_csv('hyperparameter_tuning_third_simulation.csv')
 Result:
 kappa = 1, xi = 0.7 is optimzal (and ei acq function)
 """
+
+# %%
+"""
+Plotting convergence process
+"""
+pbounds = {
+    'x': (180, 220),
+    'y': (2, 8),
+    'z': (90, 110)
+}
+
+step_sizes = [5, 1, 2]
+
+truth_value = [215, 4, 98]
+
+simulation, order_of_probed_points = run_simulation(
+    step_sizes=step_sizes,
+    hyperparameter=UtilityFunction(
+        kind='ei',
+        kappa=1,
+        xi=0.7,
+    ),
+    truth_value=truth_value,
+    bounds=pbounds,
+    epochs=18
+)
+
+# %%
+
+
+def plot_convergence(
+    order_of_probed_points: List[List[int]],
+    loss_function: Callable,
+    truth_value: List[int],
+    step_sizes: List[int],
+) -> None:
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    # probed points
+    x = np.array([point[0]
+                 for point in order_of_probed_points] + [truth_value[0]])
+    y = np.array([point[1]
+                 for point in order_of_probed_points] + [truth_value[1]])
+    z = np.array([point[2]
+                 for point in order_of_probed_points] + [truth_value[2]])
+    c = np.array([loss_function(point, step_sizes, truth_value)
+                 for point in order_of_probed_points] + [0])
+    # ax.plot3D(x, y, z, 'grey')
+    image = ax.scatter3D(x, y, z, c=c, cmap=plt.cool())
+    ax.set_xlabel('print temperature')
+    ax.set_ylabel('retraction distance')
+    ax.set_zlabel('flow rate')
+    fig.colorbar(image, pad=0.05, label="loss", location='left')
+    plt.show()
+
+
+def plot_loss(
+    order_of_probed_points: List[List[int]],
+    loss_function: Callable,
+    truth_value: List[int],
+    step_sizes: List[int],
+) -> None:
+    x = np.arange(len(order_of_probed_points))
+    loss = np.array([loss_function(point, step_sizes, truth_value)
+                     for point in order_of_probed_points])
+    best_point = [loss[0]]
+    for l in loss[1:]:
+        if l > best_point[-1]:
+            best_point.append(l)
+        else:
+            best_point.append(best_point[-1])
+    plt.step(x, loss, label='loss of probed point')
+    plt.step(x, best_point, label='loss of best point', linestyle='dashed')
+    plt.legend(loc='lower right', borderaxespad=0.)
+    plt.xlabel("epochs")
+    plt.ylabel("loss")
+
+
+plot_convergence(
+    order_of_probed_points,
+    calculate_loss,
+    truth_value,
+    step_sizes
+)
+
+# %%
+plot_loss(
+    order_of_probed_points,
+    calculate_loss,
+    truth_value,
+    step_sizes
+)
 
 # %%
