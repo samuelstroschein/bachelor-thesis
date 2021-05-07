@@ -249,7 +249,7 @@ df3.to_csv('hyperparameter_tuning_third_simulation.csv')
 
 """
 Result:
-
+kappa = 1, xi = 0.7 is optimzal (and ei acq function)
 """
 
 # %%
