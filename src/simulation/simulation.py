@@ -91,6 +91,49 @@ def run_simulation(
     return optimizer, order_of_probed_points
 
 
+def random_baseline_simulation(
+    hyperparameter: UtilityFunction,
+    step_sizes: List[int],
+    bounds: dict,
+    epochs: int,
+    truth_value: list,
+) -> Tuple[CustomBayesianOptimization, List]:
+    optimizer = CustomBayesianOptimization(
+        f=None,
+        parameter_step_sizes=step_sizes,
+        pbounds=bounds,
+        verbose=2,  # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent
+    )
+    first_point = optimizer.parameters_to_array(
+        optimizer.suggest(hyperparameter)
+    )
+    second_point = optimizer.parameters_to_array(
+        optimizer.suggest(hyperparameter)
+    )
+    order_of_probed_points: List[List[int]] = [
+        first_point.tolist(), second_point.tolist()
+    ]
+    for _ in range(epochs):
+        next_point = optimizer.parameters_to_array(
+            optimizer.suggest(hyperparameter)
+        ).tolist()
+        while next_point in order_of_probed_points:
+            next_point = optimizer.parameters_to_array(
+                optimizer.suggest(hyperparameter)
+            ).tolist()
+        order_of_probed_points.append(next_point)
+
+    optimizer.tell_ranking(
+        simulated_ranking(
+            order_of_probed_points,  # type: ignore
+            step_sizes,
+            truth_value,
+            calculate_loss
+        )
+    )
+    return optimizer, order_of_probed_points
+
+
 def experiment(
     acquisition_function: str,
     bounds: dict,
@@ -105,7 +148,8 @@ def experiment(
             epochs_until_solution = []  # type:ignore
             losses_of_solutions = []  # type:ignore
             has_error = False
-            for _ in range(num_runs):
+            for i in range(num_runs):
+                print(f"starting run {i}")
                 try:
                     bounds_as_list = list(bounds.values())
                     random_truth_value: List[int] = []
@@ -113,6 +157,7 @@ def experiment(
                         random_truth_value.append(
                             random.randint(lower, upper)
                         )
+                    #! change simulation here to random or not
                     simulation, order_of_probed_points = run_simulation(
                         step_sizes=step_sizes,
                         hyperparameter=UtilityFunction(
@@ -257,12 +302,81 @@ kappa = 1, xi = 0.7 is optimzal (and ei acq function)
 
 # %%
 """
+Fourth Simulation:
+
+Random selection of next probes in order to create a baseline model
+"""
+acquisition_functions = ['ei']
+results = []
+
+for acquisition_function in acquisition_functions:
+    results = results + experiment(
+        step_sizes=step_sizes,
+        acquisition_function=acquisition_function,
+        bounds=pbounds,
+        num_runs=100,
+        kappa=np.arange(1, 2, 1),
+        xi=np.arange(0.7, 0.75, 0.1)
+    )
+
+df4 = pd.DataFrame(results)
+
+df4.to_csv('hyperparameter_tuning_random_baseline.csv')
+
+"""
+Result:
+Better than random
+"""
+
+# %%
+"""
+Fifth Simulation:
+
+Random and none random selection with 5 variables
+"""
+
+pbounds = {
+    'a': (180, 220),
+    'b': (2, 8),
+    'c': (90, 110),
+    'd': (30, 60),
+    'd': (40, 50),
+}
+
+step_sizes = [5, 1, 2, 5, 1]
+
+acquisition_functions = ['ei']
+results = []
+
+for acquisition_function in acquisition_functions:
+    results = results + experiment(
+        step_sizes=step_sizes,
+        acquisition_function=acquisition_function,
+        bounds=pbounds,
+        num_runs=100,
+        kappa=np.arange(1, 2, 1),
+        xi=np.arange(0.7, 0.75, 0.1)
+    )
+
+df5 = pd.DataFrame(results)
+
+# df5.to_csv('hyperparameter_tuning_random_baseline_5_parameter.csv')
+
+df5.to_csv('hyperparameter_tuning_random_optimal_5_parameter.csv')
+
+"""
+Result:
+
+"""
+
+# %%
+"""
 Plotting convergence process
 """
 pbounds = {
     'x': (180, 220),
     'y': (2, 8),
-    'z': (90, 110)
+    'z': (90, 110),
 }
 
 step_sizes = [5, 1, 2]
