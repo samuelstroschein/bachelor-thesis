@@ -1,3 +1,6 @@
+# read the PDF version [HERE](bachelor_thesis.pdf)
+
+
 Calibrating print settings of low cost personal 3D printers is a key requirement to print objects with satisfactory quality. As of today, there exists no widely adopted automatic calibration of 3D print settings. In this paper, a semi-automatic calibration/optimization algorithm for 3D print settings has been developed. Semi-automatic because the users evaluation of test prints is required. While the resulting algorithm consistently comes close to the global optimum (the best print settings) in a simulated environment, the real world application is limited to non-existent.
 
 3D Printing; Bayesian Optimization; Derivative Free Optimization; 3D Print Quality; FDM printer
