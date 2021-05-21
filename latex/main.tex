@@ -1,0 +1,69 @@
+\documentclass[a4paper, times, 10pt,top=3.5cm,bottom=3.5cm,left=3cm,right=3cm]{article}
+
+\usepackage{ISARC}
+
+\usepackage{lscape}
+\usepackage{hologo}
+% \usepackage[margin=1cm]{caption}
+\usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage{minted}
+
+
+\usepackage[parfill]{parskip}
+
+
+% TEMPLATE: https://www.overleaf.com/latex/templates/isarc-paper-template/cdfwbxsghpyv
+
+
+\begin{document}
+
+ % Do not change the following line
+\linespread{0.5}
+
+\title{Semi-Automatic Optimization of 3D Print Settings}
+
+\author{Benn Samuel Stroschein}
+
+\affiliation{Faculty of Science, Vrije Universiteit Amsterdam}
+
+
+% Do not change the following three lines
+\maketitle 
+\thispagestyle{fancy} 
+\pagestyle{fancy}
+
+
+\begin{abstract}
+Calibrating print settings of low cost personal 3D printers is a key requirement to print objects with satisfactory quality. As of today, there exists no widely adopted automatic calibration of 3D print settings. In this paper, a semi-automatic calibration/optimization algorithm for 3D print settings has been developed. Semi-automatic because the users evaluation of test prints is required. While the resulting algorithm consistently comes close to the global optimum (the best print settings) in a simulated environment, the real world application is limited to non-existent. 
+\end{abstract}
+
+\begin{keywords}
+3D Printing; Bayesian Optimization; Derivative Free Optimization; 3D Print Quality; FDM printer
+\end{keywords}
+
+\input{section/introduction}
+
+\input{section/approach}
+
+\newpage
+\input{section/implementation}
+
+\input{section/evaluation}
+
+\input{section/conclusion}
+
+\pagebreak
+\bibliography{ISARC}
+
+\section{Appendix}
+
+\begin{figure*}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{assets/enderPrinter.JPG}
+    \caption{The Ender 3 printer used during this project and lot's of stringing tests.}
+    \label{appendix/enderPrinter}
+\end{figure*}
+
+
+\end{document}
